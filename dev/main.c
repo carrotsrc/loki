@@ -50,9 +50,26 @@ static int finish_cb(struct nl_msg *msg, void *arg) {
 }
 
 static int error_cb(struct nl_msg *msg, struct nlmsgerr *err, void *arg) {
-	printf("Error recv\n");
+	printf("Error recv : Error %d\n", err->error);
 	*((int*)arg)  = err->error;
 	return NL_SKIP;
+}
+
+static int set_mntr_control_flag(struct nl_msg *msg) {
+	struct nl_msg *flags = nlmsg_alloc();
+
+	if(!flags) {
+		fprintf(stderr, "Error allocating flags\n");
+		nlmsg_free(flags);
+		exit(EXIT_FAILURE);
+	}
+
+	NLA_PUT_FLAG(flags, NL80211_MNTR_FLAG_CONTROL);
+	nla_put_nested(msg, NL80211_ATTR_MNTR_FLAGS, flags);
+	return 0;
+
+nla_put_failure:
+	return -1;
 }
 
 int main( int argc, char *argv[]) {
@@ -65,6 +82,7 @@ int main( int argc, char *argv[]) {
 	struct nl_msg *msg = NULL;
 	struct nl_sock *nls = nl_socket_alloc();
 	struct nl_cb *cb = NULL;
+
 	signed long long devid;
 	int family, cmd, bytes, rcode = EXIT_SUCCESS, flags = 0;
 
@@ -82,13 +100,15 @@ int main( int argc, char *argv[]) {
 	}
 
 	cmd = NL80211_CMD_SET_INTERFACE;
-
 	NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, devid);
 	NLA_PUT_U32(msg, NL80211_ATTR_IFTYPE, NL80211_IFTYPE_MONITOR);
 
-
 	/* port is 0 - send to kernel */
 	genlmsg_put(msg, 0, 0, family, 0, flags, cmd, 0);
+
+	if(set_mntr_control_flag(msg) < 0)
+		goto nla_put_failure;
+	
 	bytes = nl_send_auto(nls, msg);
 	if(bytes < 0) {
 		fprintf(stderr, "Error send message\n");
