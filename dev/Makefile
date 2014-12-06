@@ -5,7 +5,7 @@ SOURCES := $(shell find ./ -name '*.c')
 OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
 
 all: $(OBJECTS)
-	$(CC) $(CFLAGS) $(NLFLAGS) $(OBJECTS) -o cap
+	$(CC) $(CFLAGS) $(NLFLAGS) $(OBJECTS) -o dev
 
 $(OBJECTS): %.o: %.c
 	$(CC) $(CFLAGS) $(NLFLAGS) -c $< -o $@
