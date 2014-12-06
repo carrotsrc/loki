@@ -78,13 +78,13 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	char *dev = argv[1], errbuf[PCAP_ERRBUF_SIZE];
+	char *dev = argv[1], errbuf[PCAP_ERRBUF_SIZE], ifcmd[20], *ifptr;
 	struct nl_msg *msg = NULL;
 	struct nl_sock *nls = nl_socket_alloc();
 	struct nl_cb *cb = NULL;
 
 	signed long long devid;
-	int family, cmd, bytes, rcode = EXIT_SUCCESS, flags = 0;
+	int family, cmd, bytes, r, rcode = EXIT_SUCCESS, flags = 0;
 
 	init(dev, nls, &family, &devid);
 	printf("Device ID: %lld\n", devid);
@@ -139,6 +139,19 @@ int main( int argc, char *argv[]) {
 	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, (nl_recvmsg_msg_cb_t)ack_cb, (void*)(&bytes));
 	while(bytes > 0)
 		nl_recvmsgs(nls, cb);
+
+	ifptr = ifcmd;
+	sprintf(ifptr, "ifconfig %s up", dev);
+	printf("$ %s\n", ifptr);
+
+	r = system(ifptr);
+	if(r == -1)
+		fprintf(stderr, "Error in creating child process\n");
+	else if(r == EXIT_FAILURE)
+		fprintf(stderr, "Child process EXIT_FAILURE\n");
+	else if(r == EXIT_SUCCESS)
+		fprintf(stdout, "device is up\n", dev);
+
 
 	goto clean_out;
 
