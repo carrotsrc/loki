@@ -50,7 +50,7 @@ static int finish_cb(struct nl_msg *msg, void *arg) {
 }
 
 static int error_cb(struct nl_msg *msg, struct nlmsgerr *err, void *arg) {
-	printf("Error recv : Error %d\n", err->error);
+	printf("Error on recv: %d\n", err->error);
 	*((int*)arg)  = err->error;
 	return NL_SKIP;
 }
@@ -65,6 +65,12 @@ static int set_mntr_control_flag(struct nl_msg *msg) {
 	}
 
 	NLA_PUT_FLAG(flags, NL80211_MNTR_FLAG_CONTROL);
+
+	/* this is being placed directly into a family headed
+	 * message which is not correct and probably the cause
+	 * of the error being thrown. Somewhere in iw, a
+	 * nested message is opened... can't find where yet
+	 */
 	nla_put_nested(msg, NL80211_ATTR_MNTR_FLAGS, flags);
 	return 0;
 
@@ -87,8 +93,8 @@ int main( int argc, char *argv[]) {
 	int family, cmd, bytes, rcode = EXIT_SUCCESS, flags = 0;
 
 	init(dev, nls, &family, &devid);
-	printf("Device `%s` ID: %lld\n", dev, devid);
-	printf("Device family ID: %d\n", family);
+	printf("Device ID: %lld\n", devid);
+	printf("Netlink family ID: %d\n", family);
 
 	cb = nl_cb_alloc(NL_CB_DEFAULT);
 	msg = nlmsg_alloc();
@@ -99,19 +105,20 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	cmd = NL80211_CMD_SET_INTERFACE;
 	NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, devid);
 	NLA_PUT_U32(msg, NL80211_ATTR_IFTYPE, NL80211_IFTYPE_MONITOR);
 
 	/* port is 0 - send to kernel */
-	genlmsg_put(msg, 0, 0, family, 0, flags, cmd, 0);
+	genlmsg_put(msg, 0, 0, family, 0, flags, NL80211_CMD_SET_INTERFACE, 0);
 
 	if(set_mntr_control_flag(msg) < 0)
 		goto nla_put_failure;
 	
+	nl_socket_set_cb(nls, cb); /* Heavens to murgatroyd - this function is undocumented */
+
 	bytes = nl_send_auto(nls, msg);
 	if(bytes < 0) {
-		fprintf(stderr, "Error send message\n");
+		fprintf(stderr, "Error sending message\n");
 		nlmsg_free(msg);
 		nl_socket_free(nls);
 		exit(EXIT_FAILURE);

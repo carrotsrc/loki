@@ -1,6 +1,6 @@
 CC=gcc -ggdb
 NLFLAGS:=`pkg-config --cflags --libs libnl-3.0`
-CFLAGS=-lpcap -lnl-genl-3
+CFLAGS=-lpcap -lnl-genl-3 -DCONFIG_LIBNL30
 SOURCES := $(shell find ./ -name '*.c')
 OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
 
