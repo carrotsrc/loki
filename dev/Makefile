@@ -1,0 +1,15 @@
+CC=gcc -ggdb
+NLFLAGS:=`pkg-config --cflags --libs libnl-3.0`
+CFLAGS=-lpcap -lnl-genl-3
+SOURCES := $(shell find ./ -name '*.c')
+OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
+
+all: $(OBJECTS)
+	$(CC) $(CFLAGS) $(NLFLAGS) $(OBJECTS) -o cap
+
+$(OBJECTS): %.o: %.c
+	$(CC) $(CFLAGS) $(NLFLAGS) -c $< -o $@
+
+clean:
+	find . -name "*.o" -type f -delete
+	make all
