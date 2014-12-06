@@ -4,7 +4,7 @@ Wireless device security demo
 
 #### Background
 
-I have been asked to demonstrate some wireless device security problems in a lecture for some teens.
+I have been asked to demonstrate some wireless device security problems as part of a someone else's larger lecture to GCSE students.
 
 I have a functional demonstration worked out but I aim to run as much as possible from custom software, so I understand at least whats happening at the level of the software I would otherwise use in the demonstration. It's taking me on quite a rollercoaster through TAP devices, netlink messaging, 80211 standard, DHCP, packet analysis and much more. It's probably more educational for me than it will be for the teens.
 
