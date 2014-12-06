@@ -25,9 +25,9 @@ I am positive there is a more elegent solution to applying predefine data struct
 
 This is my current work. I started out using pcap to get packets from the device. I wanted to break it down into the specific functions to bring the device up into monitor mode correctly without using iw; however it was spitting out an error (-6 if memory serves) even though the device *can* be put into the mode.
 
-Since *iw* can set the monitor flag correctly, I'm now into the source code.
+Since *iw* can set the monitor flag correctly, I looked at how that was doing it.
 
-After working through it's preprocessor black magick for setting up the command handlers, I'm into the libnl stuff. At the moment I've got it pushing messages to the device but I'm fairly certain that it's spitting out an error because in *iw* it is putting the monitor flag into a nested attribute; I'm guessing the message parser is expecting that. Now I've got to hunt down where this happens or maybe another indication of what is going wrong.
+After working through it's preprocessor (black magick) code for setting up the command handlers, I got into the libnl stuff; using iw and the nl80211.h as a reference, the device is now switched into monitor mode correctly via a netlink message.
 
 
 ## NOTE: ##
