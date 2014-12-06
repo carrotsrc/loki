@@ -65,7 +65,7 @@ int main( int argc, char *argv[]) {
 
 		exit(EXIT_FAILURE);
 	}
-	
+
 	printf("device is up\n", dev);
 	/* device is now up */
 
