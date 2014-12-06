@@ -105,11 +105,13 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	/* port is 0 - send to kernel */
+	genlmsg_put(msg, 0, 0, family, 0, flags, NL80211_CMD_SET_INTERFACE, 0);
+
+
 	NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, devid);
 	NLA_PUT_U32(msg, NL80211_ATTR_IFTYPE, NL80211_IFTYPE_MONITOR);
 
-	/* port is 0 - send to kernel */
-	genlmsg_put(msg, 0, 0, family, 0, flags, NL80211_CMD_SET_INTERFACE, 0);
 
 	if(set_mntr_control_flag(msg) < 0)
 		goto nla_put_failure;
