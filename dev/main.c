@@ -10,7 +10,7 @@
 
 #include "nl80211.h"
 
-void init(const char *dev, struct nl_sock *nls, int *family, signed long long *devid) {
+static void init(const char *dev, struct nl_sock *nls, int *family, signed long long *devid) {
 	if(!nls) {
 		fprintf(stderr, "Failed to allocate socket\n");
 		exit(EXIT_FAILURE);
@@ -38,20 +38,20 @@ void init(const char *dev, struct nl_sock *nls, int *family, signed long long *d
 }
 
 static int ack_cb(struct nl_msg *msg, void *arg) {
-	printf("ack\n");
+	printf("Ack recv\n");
 	*((int*)arg)  = 0;
 	return NL_STOP;
 }
 
 static int finish_cb(struct nl_msg *msg, void *arg) {
-	printf("fin\n");
+	printf("Finish recv\n");
 	*((int*)arg)  = 0;
 	return NL_SKIP;
 }
 
 static int error_cb(struct nl_msg *msg, struct nlmsgerr *err, void *arg) {
-	printf("err\n");
-	*((int*)arg)  = 0;
+	printf("Error recv\n");
+	*((int*)arg)  = err->error;
 	return NL_SKIP;
 }
 
@@ -101,6 +101,9 @@ int main( int argc, char *argv[]) {
 
 	bytes = 1;
 
+	nl_cb_err(cb, NL_CB_CUSTOM, (nl_recvmsg_err_cb_t)error_cb, (void*)(&bytes));
+	nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, (nl_recvmsg_msg_cb_t)finish_cb, (void*)(&bytes));
+	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, (nl_recvmsg_msg_cb_t)ack_cb, (void*)(&bytes));
 	while(bytes > 0)
 		nl_recvmsgs(nls, cb);
 
