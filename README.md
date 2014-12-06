@@ -14,7 +14,9 @@ Current Progress: Capture
 
 Finally got my hands dirty in python! It seemed like a perfect application of the language.
 
-Working backwards from wiresharks packet and hex dumps (I was cross eyed after a few hours) and with a bit of referencing from some manuals, managed to put together a simple DNS spoof server. Tested and works for the demonstration.
+Working backwards from wireshark's packet and hex dumps (I was cross eyed after a few hours) and with a bit of referencing from some manuals, managed to put together a simple DNS spoof server. Tested and works for the demonstration.
+
+I am positive there is a more elegent solution to applying predefine data structure on a sequence of bytes than that hacked together mess I layed out using list indecies.
 
 
 ### Loki Capture
