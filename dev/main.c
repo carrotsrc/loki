@@ -65,12 +65,6 @@ static int set_mntr_control_flag(struct nl_msg *msg) {
 	}
 
 	NLA_PUT_FLAG(flags, NL80211_MNTR_FLAG_CONTROL);
-
-	/* this is being placed directly into a family headed
-	 * message which is not correct and probably the cause
-	 * of the error being thrown. Somewhere in iw, a
-	 * nested message is opened... can't find where yet
-	 */
 	nla_put_nested(msg, NL80211_ATTR_MNTR_FLAGS, flags);
 	return 0;
 
