@@ -29,6 +29,8 @@ Since *iw* can set the monitor flag correctly, I looked at how that was doing it
 
 After working through it's preprocessor (black magick) code for setting up the command handlers, I got into the libnl stuff; using iw and the nl80211.h as a reference, the device is now switched into monitor mode correctly via a netlink message.
 
+Now I've moved onto getting packet capture up and running again via pcap.
+
 
 ## NOTE: ##
 

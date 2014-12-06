@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <netinet/if_ether.h>
-#include <pcap.h>
 
 #include "monitor.h"
+#include "capture.h"
 
 
 
@@ -11,11 +11,15 @@
  * this needs to be researched more deeply
  * to see what net-tools is up to...
  */
-static int ifconfig_device_up(const char *dev) {
+static int ifconfig_device_up(const char *dev, const char *address) {
 
 
-	char ifcfg[20];
-	sprintf(ifcfg, "ifconfig %s up", dev);
+	char ifcfg[40];
+	if(address == NULL)
+		sprintf(ifcfg, "ifconfig %s up", dev);
+	else
+		sprintf(ifcfg, "ifconfig %s %s up", dev, address);
+
 	printf("$ %s\n", ifcfg);
 
 	return system(ifcfg);
@@ -38,7 +42,7 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	char *dev = argv[1], errbuf[PCAP_ERRBUF_SIZE];
+	char *dev = argv[1];
 	int r = 0;
 
 	/* switch on monitor mode using libnl */
@@ -47,9 +51,11 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 	/* If we're here then we should be in monitor mode.
-	 * Bring device up using ifconfig
+	 * 
+	 * We don't need an address assigned
+	 * since it's in monitor mode
 	 */
-	r = ifconfig_device_up(dev);
+	r = ifconfig_device_up(dev, NULL);
 	if(r != EXIT_SUCCESS) {
 
 		if( r == -1)
@@ -61,11 +67,11 @@ int main( int argc, char *argv[]) {
 	}
 	
 	printf("device is up\n", dev);
-
 	/* device is now up */
 
+	device_capture(dev);
 	/* bring device down */
-	r = ifconfig_device_down(dev);
+	ifconfig_device_down(dev);
 	exit(EXIT_SUCCESS);
 
 }
