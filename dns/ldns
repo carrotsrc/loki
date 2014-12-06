@@ -1,0 +1,73 @@
+#!/bin/env python
+
+import os
+import sys
+import socket
+from loki.net import DNSResponse, RecordType, printPacket
+from struct import *
+
+def colorPrintLine(caption, color):
+    print "\033["+color+"m"+caption+"\033[0m"
+
+print "Loki DNS Spoofer"
+print "-----------"
+
+print("Starting... "),
+try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+    s.bind(('', 53));
+except socket.error as msg:
+    colorPrintLine("FAIL", "31")
+    print "Exception occured [" + str(msg[0]) +"]\n"+msg[1];
+    sys.exit()
+
+colorPrintLine("OK", "32;1")
+
+verbose = 0
+if len(sys.argv) > 1:
+    if sys.argv[1] == '-v':
+        verbose = 1
+
+while 1:
+    data, addr = s.recvfrom(1024)
+    colorPrintLine("@\t"+ addr[0] +" : "+ str(addr[1]), "35;1")
+    d = data[0:12]
+    query = unpack('!HHHHHH', d)
+    
+
+    dsplit = 13;
+    rest = data[13:]
+    domain = "";
+    sz = len(rest)
+    cc = 'z'
+    i = 0
+
+    while i < sz:
+        cc = rest[i]
+        ci = ord(cc)
+        i += 1
+        if ci == 0x0:
+            break
+        if ci < 10:
+            domain += "."
+        else:
+            domain += cc
+
+    queryRecord = data[12:12+i]
+
+    colorPrintLine("?\t"+domain, "34;1")
+    if verbose:
+        print "Transaction: " +hex(query[0])
+        print "Flags: " +hex(query[1])
+        print "Questions: " + str(query[2])
+        print "Ans Auth Add: " + str(query[3]) + " " + str(query[4]) + " " + str(query[5]);
+    print "~~~"
+
+    response = DNSResponse(query[0])
+    response.addQuery(queryRecord)
+    response.addAnswer("172.16.0.1", RecordType.A)
+    packet = response.generatePacket()
+    s.sendto(packet, addr)
+    if verbose:
+        printPacket(packet, 16) 
+
