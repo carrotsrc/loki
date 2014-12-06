@@ -116,7 +116,7 @@ int main( int argc, char *argv[]) {
 	
 	nl_socket_set_cb(nls, cb); /* Heavens to murgatroyd - this function is undocumented */
 /*      ^^^^^^^^^^^^^^^^
-	 * After some digging around in libnl these *_cb functions are to do
+	 * After some digging around in libnl these *_{put|set}_cb functions are to do
 	 * with reference counting.
 	 * 
 	 * nl_socket_set_cb():
