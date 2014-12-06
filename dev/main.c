@@ -115,6 +115,16 @@ int main( int argc, char *argv[]) {
 		goto nla_put_failure;
 	
 	nl_socket_set_cb(nls, cb); /* Heavens to murgatroyd - this function is undocumented */
+/*      ^^^^^^^^^^^^^^^^
+	 * After some digging around in libnl these *_cb functions are to do
+	 * with reference counting.
+	 * 
+	 * nl_socket_set_cb():
+	 * 
+	 * decreases the reference count of the current callback function structure
+	 * and increments the reference count of the structure passed in and
+	 * assigns it tp the socket structure
+	 */
 
 	bytes = nl_send_auto(nls, msg);
 	if(bytes < 0) {
