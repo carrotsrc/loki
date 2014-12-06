@@ -1,6 +1,6 @@
 # Loki
 
-Wireless security demo
+Wireless device security demo
 
 #### Background
 
