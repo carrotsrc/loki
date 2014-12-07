@@ -70,12 +70,30 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
 	sprintf(bp++, "\n");
 	sprintf(bp++, "\n");
+
+	struct pkth_mac80211 *mac = (struct pkth_mac80211*)eth;
+
+	i = j = 0;
+	while(i < sz) {
+		sprintf(bp, "%02x ", eth[i++]);
+		bp += 3;
+		if(++j == 16 || i == sz) {
+			sprintf(bp++, "\n");
+			if(i == sz)
+				sprintf(bp++, "\n");
+			j = 0;
+		}
+	}
+
+	sprintf(bp++, "\n");
 	printf("%s", buf);
 
 	bp = buf;
-	struct pkth_mac80211 *mac = (struct pkth_mac80211*)eth;
-	printf("Control:\t%04x\n", mac->control);
-	printf("duration:\t%d ms\n", mac->control);
+
+	printf("Control:\t%x\n", mac->control);
+	printf("duration:\t%d ms\n", mac->duration_id);
+
+	i = 0;
 	printf("dst:\t");
 	while(i < 6) {
 		if(i > 0)
@@ -114,7 +132,7 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 			printf(" : ");
 		printf("%02x", mac->bssid[i++]);
 	}
-	printf("\n\n\n");
+	printf("\n-----------\n\n\n");
 	free(buf);
 
 }
