@@ -57,7 +57,7 @@ unsigned int set_monitor_mode(const char *dev) {
 
 	if(set_mntr_control_flag(msg, NL80211_MNTR_FLAG_CONTROL) < 0)
 		goto nla_put_failure;
-	
+
 	nl_socket_set_cb(nls, cb); /* Heavens to murgatroyd - this function is undocumented */
 /*      ^^^^^^^^^^^^^^^^
 	 * After some digging around in libnl these *_{put|set}_cb functions are to do

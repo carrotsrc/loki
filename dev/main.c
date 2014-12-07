@@ -37,9 +37,14 @@ static int ifconfig_device_down(const char *dev) {
 
 
 int main( int argc, char *argv[]) {
+	char *addr = NULL;
 	if(argc < 2) {
 		fprintf(stderr, "Device unspecified\n");
 		exit(EXIT_FAILURE);
+	}
+
+	if(argc >= 3) {
+		addr = argv[2];
 	}
 
 	char *dev = argv[1];
@@ -55,7 +60,7 @@ int main( int argc, char *argv[]) {
 	 * We don't need an address assigned
 	 * since it's in monitor mode
 	 */
-	r = ifconfig_device_up(dev, NULL);
+	r = ifconfig_device_up(dev, addr);
 	if(r != EXIT_SUCCESS) {
 
 		if( r == -1)
