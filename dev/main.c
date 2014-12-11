@@ -58,7 +58,9 @@ int main( int argc, char *argv[]) {
 	/* If we're here then we should be in monitor mode.
 	 * 
 	 * We don't need an address assigned
-	 * since it's in monitor mode
+	 * since it's in monitor mode but 
+	 * sometimes it complains if there isn't
+	 * any address.
 	 */
 	r = ifconfig_device_up(dev, addr);
 	if(r != EXIT_SUCCESS) {

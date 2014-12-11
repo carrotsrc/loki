@@ -25,4 +25,7 @@ struct pkth_ethernet {
 	uint8_t src[6];
 	uint16_t type;
 } __attribute__((__packed__));
+
+void printhdr_mac80211(struct pkth_mac80211*);
+void printraw_packet(const unsigned char*, unsigned int);
 #endif

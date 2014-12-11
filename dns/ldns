@@ -14,11 +14,11 @@ print "-----------"
 
 print("Starting... "),
 try:
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM);
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('', 53));
 except socket.error as msg:
     colorPrintLine("FAIL", "31")
-    print "Exception occured [" + str(msg[0]) +"]\n"+msg[1];
+    print "Exception occured [" + str(msg[0]) +"]\n"+msg[1]
     sys.exit()
 
 colorPrintLine("OK", "32;1")
@@ -60,7 +60,7 @@ while 1:
         print "Transaction: " +hex(query[0])
         print "Flags: " +hex(query[1])
         print "Questions: " + str(query[2])
-        print "Ans Auth Add: " + str(query[3]) + " " + str(query[4]) + " " + str(query[5]);
+        print "Ans Auth Add: " + str(query[3]) + " " + str(query[4]) + " " + str(query[5])
     print "~~~"
 
     response = DNSResponse(query[0])
