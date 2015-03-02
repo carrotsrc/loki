@@ -11,18 +11,18 @@ struct pkth_radiotap {
 struct pkth_mac80211 {
 	uint16_t control;
 	uint16_t duration_id;
-	uint8_t da[6];
-	uint8_t sa[6];
-	uint8_t ta[6];
-	uint8_t ra[6];
-	uint8_t bssid[6];
+	uint8_t da[6]; ///< Destination MAC
+	uint8_t sa[6]; ///< Source MAC
+	uint8_t ta[6]; ///< Transmitter MAC
+	uint8_t ra[6]; ///< Receiver MAC
+	uint8_t bssid[6]; ///< Basic Service Set ID
 } __attribute__((__packed__));
 
 struct pkth_ethernet {
-	uint8_t pre[7];
-	uint8_t delim;
-	uint8_t dst[6];
-	uint8_t src[6];
+	uint8_t pre[7]; ///< Preamble
+	uint8_t delim; ///< Delimiter
+	uint8_t dst[6]; ///< Destination MAC
+	uint8_t src[6]; ///< Source MAC
 	uint16_t type;
 } __attribute__((__packed__));
 

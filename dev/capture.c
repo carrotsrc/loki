@@ -69,8 +69,11 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		return;
 	}
 
+	// Print from start of packet to byte before start of ether frame
 	printraw_packet((unsigned char*)packet, eth_begin);
 	printf("\n\n");
+
+	// print beginning of ether frame to end of packet
 	printraw_packet((unsigned char*)packet+eth_begin, sz);
 	printf("\n\n");
 
