@@ -18,6 +18,16 @@ struct pkth_mac80211 {
 	uint8_t bssid[6]; ///< Basic Service Set ID
 } __attribute__((__packed__));
 
+struct pkth_mac80211_management {
+	uint16_t control;
+	uint16_t duration_id;
+	uint8_t ra[6]; ///< Destination MAC
+	uint8_t ta[6]; ///< Transmitter MAC
+	uint8_t bssid[6]; ///< Basic Service Set ID
+	uint16_t seqctrl; ///< Sequence Control
+	uint32_t htctrl; ///< HT Control - present if control.order = 1
+} __attribute__((__packed__));
+
 struct pkth_ethernet {
 	uint8_t pre[7]; ///< Preamble
 	uint8_t delim; ///< Delimiter
@@ -67,6 +77,8 @@ struct mac80211_control {
 };
 
 void printhdr_mac80211(struct pkth_mac80211*);
+void printhdr_mac80211_management(struct pkth_mac80211_management*);
+void printhdr_etherframe(struct pkth_ethernet*);
 void printraw_packet(const unsigned char*, unsigned int);
 struct mac80211_control *decode_mac80211_control(uint16_t);
 #endif

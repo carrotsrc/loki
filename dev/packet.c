@@ -32,6 +32,36 @@ void printhdr_mac80211(struct pkth_mac80211 *mac) {
 	print_mac_address(mac->bssid);
 }
 
+void printhdr_mac80211_management(struct pkth_mac80211_management *mac) {
+	int i;
+	printf("Control:\t%x\n", mac->control);
+	printf("duration:\t%d ms\n", mac->duration_id);
+
+	printf("RA:\t");
+	print_mac_address(mac->ra);
+
+	printf("\nTA:\t");
+	print_mac_address(mac->ta);
+
+	printf("\nbssid:\t");
+	print_mac_address(mac->bssid);
+
+	printf("\nSeq:\t%d\n", mac->seqctrl);
+}
+
+void printhdr_etherframe(struct pkth_ethernet *frame) {
+	int i = 0;
+	do {
+		if(frame->pre[i] != 170)
+			break;
+	} while(++i < 7);
+
+	if(i < 7)
+		printf("Preample invalid\n");
+	else
+		printf("Preamble valid\n");
+}
+
 void printraw_packet(const unsigned char *packet, unsigned int len) {
 	unsigned int i = 0, j = 0;
 	char *buf, *bptr;

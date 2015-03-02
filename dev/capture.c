@@ -39,7 +39,6 @@ int device_capture(const char *dev) {
 		pcap_close(handle);
 		return 1;
 	}
-
 	pcap_close(handle);
 	return 0;
 
@@ -48,12 +47,13 @@ int device_capture(const char *dev) {
 
 void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
 	unsigned int eth_begin = 0, sz = 0;
-	struct pkth_mac80211 *mac = NULL;
-	struct mac80211_control *mctrl = NULL; 
+	struct pkth_mac80211_management *mac = NULL;
+	struct mac80211_control *mctrl = NULL;
+	struct pkth_ethernet *ether = NULL;
 
 	eth_begin = ((struct pkth_radiotap*)packet)->len;
 	sz = header->len - eth_begin;
-	mac = (struct pkth_mac80211*) (packet+eth_begin);
+	mac = (struct pkth_mac80211_management*) (packet+eth_begin);
 	mctrl = decode_mac80211_control(mac->control);
 
 	switch(mctrl->subtype) {
@@ -77,6 +77,6 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	printraw_packet((unsigned char*)packet+eth_begin, sz);
 	printf("\n\n");
 
-	printhdr_mac80211(mac);
+	printhdr_mac80211_management(mac);
 	printf("\n-----------\n\n\n");
 }
