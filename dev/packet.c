@@ -12,7 +12,6 @@ static void print_mac_address(uint8_t *address) {
 }
 
 void printhdr_mac80211(struct pkth_mac80211 *mac) {
-	int i;
 	printf("Control:\t%x\n", mac->control);
 	printf("duration:\t%d ms\n", mac->duration_id);
 

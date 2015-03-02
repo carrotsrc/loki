@@ -28,6 +28,12 @@ struct pkth_mac80211_management {
 	uint32_t htctrl; ///< HT Control - present if control.order = 1
 } __attribute__((__packed__));
 
+struct pkt_mac80211_fbody {
+	uint8_t timestamp[8];
+	uint16_t beacon_interval;
+	uint16_t cap_info;
+} __attribute__((__packed__));
+
 struct pkth_ethernet {
 	uint8_t pre[7]; ///< Preamble
 	uint8_t delim; ///< Delimiter

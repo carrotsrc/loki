@@ -46,15 +46,21 @@ int device_capture(const char *dev) {
 
 
 void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
+	static frameNo = 1;
 	unsigned int eth_begin = 0, sz = 0;
 	struct pkth_mac80211_management *mac = NULL;
 	struct mac80211_control *mctrl = NULL;
 	struct pkth_ethernet *ether = NULL;
+	struct pkt_mac80211_fbody *frame_body = NULL;
 
 	eth_begin = ((struct pkth_radiotap*)packet)->len;
 	sz = header->len - eth_begin;
+
 	mac = (struct pkth_mac80211_management*) (packet+eth_begin);
+	sz -= sizeof(struct pkth_mac80211_management);
+
 	mctrl = decode_mac80211_control(mac->control);
+
 
 	switch(mctrl->subtype) {
 	case BEACON:
@@ -68,15 +74,30 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		free(mctrl);
 		return;
 	}
+	printf("%d bytes\n\n", header->len);
+
+	short drop = 4;
+	if(mctrl->order)
+		drop = 0;
+
+	short hsize = sizeof(struct pkth_mac80211_management)-drop;
+	frame_body = (struct pkt_mac80211_fbody*) ((uint8_t*)packet+eth_begin+hsize + hsize);
+
+	sz -= hsize;
 
 	// Print from start of packet to byte before start of ether frame
 	printraw_packet((unsigned char*)packet, eth_begin);
 	printf("\n\n");
 
 	// print beginning of ether frame to end of packet
-	printraw_packet((unsigned char*)packet+eth_begin, sz);
+	printraw_packet((unsigned char*)packet+eth_begin, hsize);
+	printf("\n\n");
+
+	// print beginning of ether frame to end of packet
+	printraw_packet((unsigned char*)packet+eth_begin+hsize, sz);
 	printf("\n\n");
 
 	printhdr_mac80211_management(mac);
+	printf("capinfo: 0x%02x\n", frame_body->cap_info);
 	printf("\n-----------\n\n\n");
 }
