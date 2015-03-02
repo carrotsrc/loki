@@ -81,7 +81,10 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		drop = 0;
 
 	short hsize = sizeof(struct pkth_mac80211_management)-drop;
-	frame_body = (struct pkt_mac80211_fbody*) ((uint8_t*)packet+eth_begin+hsize);
+	frame_body = (struct pkt_mac80211_fbody*) ((uint8_t*)packet + eth_begin + hsize);
+	uint8_t *ssid_len = ((uint8_t*)packet + eth_begin + hsize + sizeof(struct pkt_mac80211_fbody)+1);
+	char *ssid = (uint8_t*)packet + eth_begin + hsize + sizeof(struct pkt_mac80211_fbody)+2;
+
 
 	sz -= hsize;
 
@@ -98,7 +101,11 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	printf("\n\n");
 
 	printhdr_mac80211_management(mac);
-	printf("Interval: %d\n", frame_body->beacon_interval);
-	printf("capinfo: 0x%02x\n", frame_body->cap_info);
+	int i = 0;
+	printf("SSID:\t");
+	do {
+		printf("%c", *(ssid+i));
+	} while ( ++i < *ssid_len);
+	printf("\n");
 	printf("\n-----------\n\n\n");
 }
