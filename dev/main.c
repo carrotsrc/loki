@@ -69,7 +69,6 @@ int main( int argc, char *argv[]) {
 			fprintf(stderr, "Error in creating child process\n");
 		else if(r == EXIT_FAILURE)
 			fprintf(stderr, "Child process EXIT_FAILURE\n");
-
 		exit(EXIT_FAILURE);
 	}
 
@@ -78,7 +77,7 @@ int main( int argc, char *argv[]) {
 
 	device_capture(dev);
 	/* bring device down */
-	ifconfig_device_down(dev);
-	exit(EXIT_SUCCESS);
+	//ifconfig_device_down(dev);
 
+	exit(EXIT_SUCCESS);
 }

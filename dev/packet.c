@@ -16,17 +16,17 @@ void printhdr_mac80211(struct pkth_mac80211 *mac) {
 	printf("Control:\t%x\n", mac->control);
 	printf("duration:\t%d ms\n", mac->duration_id);
 
-	printf("dst:\t");
-	print_mac_address(mac->dst);
+	printf("DA:\t");
+	print_mac_address(mac->da);
 
-	printf("\nsrc:\t");
-	print_mac_address(mac->src);
+	printf("\nSA:\t");
+	print_mac_address(mac->sa);
 
-	printf("\ntrn:\t");
-	print_mac_address(mac->trn);
+	printf("\nTA:\t");
+	print_mac_address(mac->ta);
 
-	printf("\nrcv:\t");
-	print_mac_address(mac->rcv);
+	printf("\nRA:\t");
+	print_mac_address(mac->ra);
 
 	printf("\nbssid:\t");
 	print_mac_address(mac->bssid);
@@ -48,3 +48,44 @@ void printraw_packet(const unsigned char *packet, unsigned int len) {
 	printf("%s", buf);
 	free(buf);
 }
+
+struct mac80211_control *decode_mac80211_control(uint16_t cf) {
+	struct mac80211_control *fields = malloc(sizeof(struct mac80211_control));
+	
+	fields->protocol = cf&0x03;
+	cf >>= 2;
+	
+	fields->type = cf&0x03;
+	cf >>= 2;
+
+	fields->subtype = cf&0x0f;
+	cf >>= 4;
+
+	fields->toDS = cf&0x01;
+	cf >>= 1;
+
+	fields->fromDS = cf&0x01;
+	cf >>= 1;
+
+	fields->frags = cf&0x01;
+	cf >>= 1;
+
+	fields->retry = cf&0x01;
+	cf >>= 1;
+
+	fields->powerman = cf&0x01;
+	cf >>= 1;
+
+	fields->data = cf&0x01;
+	cf >>= 1;
+
+	fields->protected = cf&0x01;
+	cf >>= 1;
+
+	fields->order = cf&0x01;
+	cf >>= 1;
+
+	return fields;
+}
+
+

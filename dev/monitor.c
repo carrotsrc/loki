@@ -27,14 +27,20 @@ static int error_cb(struct nl_msg*, struct nlmsgerr*, void*);
 static int set_mntr_control_flag(struct nl_msg*, int);
 
 unsigned int set_monitor_mode(const char *dev) {
-	struct nl_msg *msg = NULL;
-	struct nl_sock *nls = nl_socket_alloc();
-	struct nl_cb *cb = NULL;
-
 	signed long long devid;
 	int family, cmd, bytes, flags = 0;
 
+	struct nl_msg *msg = NULL;
+	struct nl_cb *cb = NULL;
+	struct nl_sock *nls = nl_socket_alloc();
+
+	if(nls == NULL) {
+		fprintf(stderr, "Netlink: NULL netlink socket\n");
+		exit(1);
+	}
+
 	init(dev, nls, &family, &devid);
+	printf("FD: %d\n", nl_socket_get_fd(nls));
 	printf("Device ID: %lld\n", devid);
 	printf("Netlink family ID: %d\n", family);
 
@@ -96,14 +102,14 @@ nla_put_failure: /* labels in your macros, libnl? I shake a tiny fist at you*/
 
 static void init(const char *dev, struct nl_sock *nls, int *family, signed long long *devid) {
 	if(!nls) {
-		fprintf(stderr, "Failed to allocate socket\n");
+		fprintf(stderr, "Netlink: Failed to allocate socket\n");
 		exit(EXIT_FAILURE);
 	}
 
-	nl_socket_set_buffer_size(nls, 8192, 8192);
+	int r = nl_socket_set_buffer_size(nls, 8192, 8192);
 	/* this creates a local socket + binds to GENERIC NETLINK*/
 	if(genl_connect(nls)) {
-		fprintf(stderr, "Failed to create socket fd\n");
+		fprintf(stderr, "Netlink: Failed to create socket fd\n");
 		nl_socket_free(nls);
 		exit(EXIT_FAILURE);
 	}

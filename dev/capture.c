@@ -48,15 +48,32 @@ int device_capture(const char *dev) {
 
 void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
 	unsigned int eth_begin = 0, sz = 0;
-	
+	struct pkth_mac80211 *mac = NULL;
+	struct mac80211_control *mctrl = NULL; 
+
 	eth_begin = ((struct pkth_radiotap*)packet)->len;
 	sz = header->len - eth_begin;
+	mac = (struct pkth_mac80211*) (packet+eth_begin);
+	mctrl = decode_mac80211_control(mac->control);
+
+	switch(mctrl->subtype) {
+	case BEACON:
+		printf("Beacon\n");
+		break;
+
+	case PROBE_REQUEST:
+		printf("Probe Request\n");
+		break;
+	default:
+		free(mctrl);
+		return;
+	}
 
 	printraw_packet((unsigned char*)packet, eth_begin);
 	printf("\n\n");
 	printraw_packet((unsigned char*)packet+eth_begin, sz);
 	printf("\n\n");
 
-	printhdr_mac80211((struct pkth_mac80211*)(packet+eth_begin));
+	printhdr_mac80211(mac);
 	printf("\n-----------\n\n\n");
 }
