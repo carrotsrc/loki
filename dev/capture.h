@@ -5,19 +5,30 @@
 	int device_capture(const char*);
 
 
-	struct frame_list {
-		struct frame_list *prev, *next;
+	struct beacon_frame_item {
+		struct beacon_frame_item *prev, *next;
 		uint8_t mac[6], ssid_len;
 		char *ssid;
 		uint64_t count;
 	};
 
+	struct proberq_frame_item {
+		struct proberq_frame_item *prev, *next;
+		uint8_t ssid_len;
+		char *ssid;
+		uint64_t count;
+	};
+
 	struct frame_log {
-		struct lists {
+		struct b_list {
 			int num;
-			struct frame_list *list;
-			struct frame_list *tail;
-		} beacon, probe_requests;
+			struct beacon_frame_item *list, *tail;
+		} beacon;
+
+		struct prq_list {
+			int num;
+			struct proberq_frame_item *list, *tail;
+		} proberq;
 
 	};
 #endif

@@ -5,7 +5,9 @@
 #include "packet.h"
 /* pcap callback for reading a packet */
 static void capture_cb(u_char*, const struct pcap_pkthdr*, const u_char*);
-static struct frame_list *ssid_exists(struct frame_list*, char*);
+
+static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, char*);
+static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, char*);
 
 static void process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static void process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
@@ -89,7 +91,18 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
 }
 
-static struct frame_list *ssid_exists(struct frame_list *list, char *value) {
+static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item *list, char *value) {
+	if(list == NULL)
+		return NULL;
+
+	do {
+		if(strcmp(list->ssid, value) == 0)
+			return list;
+	} while((list = list->next) != NULL);
+	return NULL;
+}
+
+static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item *list, char *value) {
 	if(list == NULL)
 		return NULL;
 
@@ -114,10 +127,10 @@ static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint1
 	if(ssid == NULL)
 		return;
 
-	struct frame_list *item = NULL;
+	struct beacon_frame_item *item = NULL;
 
-	if( (item = ssid_exists(log->beacon.list, ssid)) == NULL) {
-		item = (struct frame_list*) malloc(sizeof(struct frame_list));
+	if( (item = beacon_ssid_exists(log->beacon.list, ssid)) == NULL) {
+		item = (struct beacon_frame_item*) malloc(sizeof(struct beacon_frame_item));
 
 		if(log->beacon.list == NULL)
 			log->beacon.list = item;
@@ -183,31 +196,29 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 	if(ssid == NULL || ssid[0] == '*')
 		return;
 
-	printf("Request for: %s\n", ssid);
-/*
-	struct frame_list *item = NULL;
+	struct proberq_frame_item *item = NULL;
 
-	if( (item = ssid_exists(log->beacon.list, ssid)) == NULL) {
-		item = (struct frame_list*) malloc(sizeof(struct frame_list));
+	if( (item = proberq_ssid_exists(log->proberq.list, ssid)) == NULL) {
+		item = (struct proberq_frame_item*) malloc(sizeof(struct proberq_frame_item));
 
-		if(log->beacon.list == NULL)
-			log->beacon.list = item;
+		if(log->proberq.list == NULL)
+			log->proberq.list = item;
 
-		item->prev = log->beacon.tail;
+		item->prev = log->proberq.tail;
 		if(item->prev != NULL)
 			item->prev->next = item;
 
-		log->beacon.tail = item;
+		log->proberq.tail = item;
 		item->ssid_len = strlen(ssid);
 		item->ssid = ssid;
-		memcpy(&(item->mac), (uint8_t*)((struct mac80211_management_hdr*)frame)->bssid, 6);
+		//memcpy(&(item->mac), (uint8_t*)((struct mac80211_management_hdr*)frame)->bssid, 6);
 		item->count = 0;
 		item->next = NULL;
-		log->beacon.num++;
+		log->proberq.num++;
 	} else {
 		free(ssid);
 	}
 
 	item->count++;
-*/
+	printf("Request for: %s\nRequest num: %ld\n", item->ssid, item->count);
 }
