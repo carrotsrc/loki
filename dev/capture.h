@@ -4,6 +4,10 @@
 
 	int device_capture(const char*);
 
+	struct macaddr_list_item {
+		struct macaddr_list_item *prev, *next;
+		uint8_t addr[6];
+	};
 
 	struct beacon_frame_item {
 		struct beacon_frame_item *prev, *next;
@@ -17,7 +21,9 @@
 		uint8_t ssid_len;
 		char *ssid;
 		uint64_t count;
+		struct macaddr_list_item *list, *tail;
 	};
+
 
 	struct frame_log {
 		struct b_list {

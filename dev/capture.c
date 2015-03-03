@@ -8,6 +8,7 @@ static void capture_cb(u_char*, const struct pcap_pkthdr*, const u_char*);
 
 static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, char*);
 static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, char*);
+static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item*, uint8_t*);
 
 static void process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static void process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
@@ -113,6 +114,17 @@ static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item 
 	return NULL;
 }
 
+static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item *list, uint8_t *value) {
+	if(list == NULL)
+		return NULL;
+
+	do {
+		if(memcmp(list->addr, value, 6) == 0)
+			return list;
+	} while((list = list->next) != NULL);
+	return NULL;
+}
+
 static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
 
 	struct mac80211_beacon_fixed *beacon_fixed = NULL;
@@ -211,7 +223,7 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 		log->proberq.tail = item;
 		item->ssid_len = strlen(ssid);
 		item->ssid = ssid;
-		//memcpy(&(item->mac), (uint8_t*)((struct mac80211_management_hdr*)frame)->bssid, 6);
+		item->list = item->tail = NULL;
 		item->count = 0;
 		item->next = NULL;
 		log->proberq.num++;
@@ -220,5 +232,19 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 	}
 
 	item->count++;
-	printf("Request for: %s\nRequest num: %ld\n", item->ssid, item->count);
+	uint8_t *addr = ((struct mac80211_management_hdr*)frame)->ta;
+	if(proberq_mac_exists(item->list, addr) == NULL ) {
+		struct macaddr_list_item *addr_item = (struct macaddr_list_item*) malloc(sizeof(struct macaddr_list_item));
+		memcpy(addr_item->addr, addr, 6);
+		
+		if(item->list == NULL)
+			item->list = addr_item;
+
+		if(item->tail != NULL)
+			item->tail->next = addr_item;
+
+		addr_item->prev = item->tail;
+		addr_item->next = NULL;
+
+	}
 }
