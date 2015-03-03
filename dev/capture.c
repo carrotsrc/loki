@@ -54,10 +54,15 @@ int device_capture(const char *dev) {
 
 
 void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-	unsigned int eth_begin = 0, sz = 0;
+
+	uint16_t eth_begin = 0, sz = 0, hsize = 0;
+
 	struct mac80211_management_hdr *manhdr = NULL;
 	struct mac80211_control *mctrl = NULL;
-	struct frame_log *log = (struct frame_log*) args;
+	struct frame_log *log = NULL;
+	
+	
+	log = (struct frame_log*) args;
 
 	eth_begin = ((struct pkth_radiotap*)packet)->len;
 	sz = header->len - eth_begin;
@@ -71,29 +76,15 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		break;
 
 	case PROBE_REQUEST:
-		printf("Probe Request\n");
 		break;
 	default:
 		free(mctrl);
 		return;
 	}
-	printf("%d bytes\n", header->len);
+	printraw_management_frame(packet, header->len);
+	printf("-----------\n\n\n");
 	free(mctrl);
 
-	// Print from start of packet to byte before start of ether frame
-//	printraw_packet((unsigned char*)packet, eth_begin);
-//	printf("\n\n");
-
-	// print beginning of ether frame to end of packet
-//	printraw_packet((unsigned char*)packet+eth_begin, hsize);
-//	printf("\n\n");
-
-	// print beginning of ether frame to end of packet
-//	printraw_packet((unsigned char*)packet+eth_begin+hsize, sz);
-//	printf("\n\n");
-
-//	printf("\n");
-//	printf("-----------\n\n\n");
 }
 
 static struct frame_list *ssid_exists(struct frame_list *list, char *value) {
@@ -136,6 +127,7 @@ static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint1
 		log->beacon.tail = item;
 		item->ssid_len = strlen(ssid);
 		item->ssid = ssid;
+		memcpy(&(item->mac), (uint8_t*)((struct mac80211_management_hdr*)frame)->bssid, 6);
 		item->count = 0;
 		item->next = NULL;
 		log->beacon.num++;
@@ -144,8 +136,6 @@ static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint1
 	}
 
 	item->count++;
-
-	printf("%s\n%ld\n", item->ssid, item->count);
 }
 
 static char *beacon_get_ssid(uint8_t *elements, uint16_t len) {
@@ -166,6 +156,7 @@ static char *beacon_get_ssid(uint8_t *elements, uint16_t len) {
 		}
 
 		ptr += e[1];
+
 	} while(ptr <= end);
 
 	return NULL;

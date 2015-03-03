@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "packet.h"
-static void print_mac_address(uint8_t *address) {
+void print_mac_address(uint8_t *address) {
 
 	int i = 0;
 	while(i < 6) {
@@ -9,45 +9,6 @@ static void print_mac_address(uint8_t *address) {
 			printf(" : ");
 		printf("%02x", address[i++]);
 	}
-}
-
-void printhdr_mac80211(struct pkth_mac80211 *mac) {
-	printf("Control:\t%x\n", mac->control);
-	printf("duration:\t%d ms\n", mac->duration_id);
-
-	printf("DA:\t");
-	print_mac_address(mac->da);
-
-	printf("\nSA:\t");
-	print_mac_address(mac->sa);
-
-	printf("\nTA:\t");
-	print_mac_address(mac->ta);
-
-	printf("\nRA:\t");
-	print_mac_address(mac->ra);
-
-	printf("\nbssid:\t");
-	print_mac_address(mac->bssid);
-}
-
-void printhdr_mac80211_management(struct mac80211_management_hdr *mac) {
-	printf("\nbssid:\t");
-	print_mac_address(mac->bssid);
-	printf("\n");
-}
-
-void printhdr_etherframe(struct pkth_ethernet *frame) {
-	int i = 0;
-	do {
-		if(frame->pre[i] != 170)
-			break;
-	} while(++i < 7);
-
-	if(i < 7)
-		printf("Preample invalid\n");
-	else
-		printf("Preamble valid\n");
 }
 
 void printraw_packet(const unsigned char *packet, unsigned int len) {
@@ -106,4 +67,31 @@ struct mac80211_control *decode_mac80211_control(uint16_t cf) {
 	return fields;
 }
 
+void printraw_management_frame(const uint8_t *packet, uint16_t len) {
+	uint8_t mac_begin, hsize;
+	struct mac80211_management_hdr *manhdr = NULL;
+	struct mac80211_control *mctrl = NULL;
 
+	mac_begin = ((struct pkth_radiotap*)packet)->len;
+	len -= mac_begin;
+
+	// Print radiotap header
+	printraw_packet((uint8_t*)packet, mac_begin);
+	printf("\n\n");
+
+	manhdr = (struct mac80211_management_hdr*) ((uint8_t*)packet+mac_begin);
+	mctrl = decode_mac80211_control(manhdr->control);
+	hsize = sizeof(struct mac80211_management_hdr);
+	if(mctrl->order == 0) hsize -= 4; // We drop the 4-byte HT field
+	len -= hsize;
+
+	// print managament header
+	printraw_packet((uint8_t*)manhdr, hsize);
+	printf("\n\n");
+
+	// print frame body
+	printraw_packet((uint8_t*)manhdr+hsize, len);
+	printf("\n\n");
+
+
+}

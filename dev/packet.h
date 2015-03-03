@@ -29,9 +29,9 @@ struct mac80211_management_hdr {
 } __attribute__((__packed__));
 
 struct mac80211_beacon_fixed {
-	uint8_t timestamp[8];
-	uint16_t beacon_interval;
-	uint16_t cap_info;
+	uint8_t timestamp[8]; ///< Timestamp
+	uint16_t beacon_interval; ///< period between beacon broadcasts
+	uint16_t cap_info; ///< capabilities of STA
 } __attribute__((__packed__));
 
 struct pkth_ethernet {
@@ -82,9 +82,8 @@ struct mac80211_control {
 
 };
 
-void printhdr_mac80211(struct pkth_mac80211*);
-void printhdr_mac80211_management(struct mac80211_management_hdr*);
-void printhdr_etherframe(struct pkth_ethernet*);
 void printraw_packet(const unsigned char*, unsigned int);
+void printraw_management_frame(const uint8_t*, uint16_t);
+void print_mac_address(uint8_t*);
 struct mac80211_control *decode_mac80211_control(uint16_t);
 #endif

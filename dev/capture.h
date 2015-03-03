@@ -4,6 +4,7 @@
 
 	int device_capture(const char*);
 
+
 	struct frame_list {
 		struct frame_list *prev, *next;
 		uint8_t mac[6], ssid_len;
