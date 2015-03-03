@@ -13,10 +13,11 @@
 	};
 
 	struct frame_log {
-		struct beacon_frames {
+		struct lists {
 			int num;
 			struct frame_list *list;
 			struct frame_list *tail;
-		} beacon;
+		} beacon, probe_requests;
+
 	};
 #endif

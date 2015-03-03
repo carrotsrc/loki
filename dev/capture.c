@@ -8,7 +8,8 @@ static void capture_cb(u_char*, const struct pcap_pkthdr*, const u_char*);
 static struct frame_list *ssid_exists(struct frame_list*, char*);
 
 static void process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
-static char *beacon_get_ssid(uint8_t*, uint16_t);
+static void process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
+static char *elements_get_ssid(uint8_t*, uint16_t);
 
 int device_capture(const char *dev) {
 
@@ -76,13 +77,14 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		break;
 
 	case PROBE_REQUEST:
+		process_probe_request((uint8_t*)manhdr, mctrl, sz, log);
 		break;
 	default:
 		free(mctrl);
 		return;
 	}
-	printraw_management_frame(packet, header->len);
-	printf("-----------\n\n\n");
+	//printraw_management_frame(packet, header->len);
+	//printf("-----------\n\n\n");
 	free(mctrl);
 
 }
@@ -108,7 +110,7 @@ static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint1
 	short hsize = sizeof(struct mac80211_management_hdr)-drop;
 
 	beacon_fixed = (struct mac80211_beacon_fixed*) ((uint8_t*)frame + hsize);
-	char *ssid = beacon_get_ssid((uint8_t*)beacon_fixed + sizeof(struct mac80211_beacon_fixed), (len-hsize + sizeof(struct mac80211_beacon_fixed)));
+	char *ssid = elements_get_ssid((uint8_t*)beacon_fixed + sizeof(struct mac80211_beacon_fixed), (len-hsize + sizeof(struct mac80211_beacon_fixed)));
 	if(ssid == NULL)
 		return;
 
@@ -138,7 +140,7 @@ static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint1
 	item->count++;
 }
 
-static char *beacon_get_ssid(uint8_t *elements, uint16_t len) {
+static char *elements_get_ssid(uint8_t *elements, uint16_t len) {
 	uint8_t e[2], *ptr, *end;
 	end = elements+len;
 	ptr = elements;
@@ -149,9 +151,14 @@ static char *beacon_get_ssid(uint8_t *elements, uint16_t len) {
 		e[1] = *(ptr++);
 
 		if(e[0] == 0) {
-			ssid = (char*) malloc(sizeof(char) * e[1]+1);
-			memcpy(ssid, ptr, e[1]);
-			ssid[e[1]] = '\0';
+			if(e[1] == 0) {
+				ssid = (char*) malloc(sizeof(char)*2);
+				ssid = "*\0";
+			} else {
+				ssid = (char*) malloc(sizeof(char) * e[1]+1);
+				memcpy(ssid, ptr, e[1]);
+				ssid[e[1]] = '\0';
+			}
 			return ssid;
 		}
 
@@ -161,4 +168,46 @@ static char *beacon_get_ssid(uint8_t *elements, uint16_t len) {
 
 	return NULL;
 
+}
+
+static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
+
+	struct mac80211_beacon_fixed *beacon_fixed = NULL;
+	short drop = 4;
+	if(mctrl->order)
+		drop = 0;
+
+	short hsize = sizeof(struct mac80211_management_hdr)-drop;
+
+	char *ssid = elements_get_ssid((uint8_t*)frame+hsize, (len-hsize));
+	if(ssid == NULL || ssid[0] == '*')
+		return;
+
+	printf("Request for: %s\n", ssid);
+/*
+	struct frame_list *item = NULL;
+
+	if( (item = ssid_exists(log->beacon.list, ssid)) == NULL) {
+		item = (struct frame_list*) malloc(sizeof(struct frame_list));
+
+		if(log->beacon.list == NULL)
+			log->beacon.list = item;
+
+		item->prev = log->beacon.tail;
+		if(item->prev != NULL)
+			item->prev->next = item;
+
+		log->beacon.tail = item;
+		item->ssid_len = strlen(ssid);
+		item->ssid = ssid;
+		memcpy(&(item->mac), (uint8_t*)((struct mac80211_management_hdr*)frame)->bssid, 6);
+		item->count = 0;
+		item->next = NULL;
+		log->beacon.num++;
+	} else {
+		free(ssid);
+	}
+
+	item->count++;
+*/
 }
