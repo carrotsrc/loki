@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project (Loki)
 
-set( GCC_CFLAG -I/usr/include/libnl3 )
+set( GCC_CFLAG "-I/usr/include/libnl3 -ggdb" )
 
 # Libs
 set( EXTRA_LIBS ${EXTRA_LIBS} -lpcap -lnl-genl-3 -lnl-3 )

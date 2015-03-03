@@ -31,21 +31,10 @@ void printhdr_mac80211(struct pkth_mac80211 *mac) {
 	print_mac_address(mac->bssid);
 }
 
-void printhdr_mac80211_management(struct pkth_mac80211_management *mac) {
-	int i;
-	printf("Control:\t%x\n", mac->control);
-	printf("duration:\t%d ms\n", mac->duration_id);
-
-	printf("RA:\t");
-	print_mac_address(mac->ra);
-
-	printf("\nTA:\t");
-	print_mac_address(mac->ta);
-
+void printhdr_mac80211_management(struct mac80211_management_hdr *mac) {
 	printf("\nbssid:\t");
 	print_mac_address(mac->bssid);
-
-	printf("\nSeq:\t%d\n", mac->seqctrl);
+	printf("\n");
 }
 
 void printhdr_etherframe(struct pkth_ethernet *frame) {
