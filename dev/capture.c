@@ -14,6 +14,10 @@ static void process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct 
 static void process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static char *elements_get_ssid(uint8_t*, uint16_t);
 
+void *device_capture_start(void *data) {
+	device_capture((const char*)data);
+}
+
 int device_capture(const char *dev) {
 
 	pcap_t *handle = NULL;
@@ -210,6 +214,7 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 
 	struct proberq_frame_item *item = NULL;
 
+	// Add any new SSIDs to the list of requests
 	if( (item = proberq_ssid_exists(log->proberq.list, ssid)) == NULL) {
 		item = (struct proberq_frame_item*) malloc(sizeof(struct proberq_frame_item));
 
@@ -232,6 +237,8 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 	}
 
 	item->count++;
+
+	// add any new trasmitter addresses for the SSID probe request
 	uint8_t *addr = ((struct mac80211_management_hdr*)frame)->ta;
 	if(proberq_mac_exists(item->list, addr) == NULL ) {
 		struct macaddr_list_item *addr_item = (struct macaddr_list_item*) malloc(sizeof(struct macaddr_list_item));
@@ -245,6 +252,5 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 
 		addr_item->prev = item->tail;
 		addr_item->next = NULL;
-
 	}
 }

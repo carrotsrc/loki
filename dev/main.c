@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include <netinet/if_ether.h>
 
 #include "monitor.h"
 #include "capture.h"
+#include "view/screen.h"
 
 
 
@@ -37,7 +39,10 @@ static int ifconfig_device_down(const char *dev) {
 
 
 int main( int argc, char *argv[]) {
-	char *addr = NULL;
+
+	pthread_t tcap, tui;
+
+	char *addr = "192.168.0.1";
 	if(argc < 2) {
 		fprintf(stderr, "Device unspecified\n");
 		exit(EXIT_FAILURE);
@@ -56,11 +61,6 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 	/* If we're here then we should be in monitor mode.
-	 * 
-	 * We don't need an address assigned
-	 * since it's in monitor mode but 
-	 * sometimes it complains if there isn't
-	 * any address.
 	 */
 	r = ifconfig_device_up(dev, addr);
 	if(r != EXIT_SUCCESS) {
@@ -75,7 +75,12 @@ int main( int argc, char *argv[]) {
 	printf("device is up\n", dev);
 	/* device is now up */
 
-	device_capture(dev);
+	if(pthread_create( &tcap, NULL, device_capture_start, (void*)dev) != 0) {
+		printf("Failed to start capture thread\n");
+		exit(EXIT_FAILURE);
+		
+	}
+	//device_capture(dev);
 	/* bring device down */
 	//ifconfig_device_down(dev);
 

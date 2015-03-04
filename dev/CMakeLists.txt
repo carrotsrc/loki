@@ -4,13 +4,14 @@ project (Loki)
 set( GCC_CFLAG "-I/usr/include/libnl3 -ggdb" )
 
 # Libs
-set( EXTRA_LIBS ${EXTRA_LIBS} -lpcap -lnl-genl-3 -lnl-3 )
+set( EXTRA_LIBS ${EXTRA_LIBS} -lpcap -lnl-genl-3 -lnl-3 -lncurses -lpthread )
 
 # Files
 set( SRC 
 	${CMAKE_CURRENT_SOURCE_DIR}/packet.c
 	${CMAKE_CURRENT_SOURCE_DIR}/monitor.c
 	${CMAKE_CURRENT_SOURCE_DIR}/capture.c
+	${CMAKE_CURRENT_SOURCE_DIR}/view/screen.c
 	${CMAKE_CURRENT_SOURCE_DIR}/main.c
 )
 

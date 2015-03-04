@@ -2,6 +2,7 @@
 #define CAPTURE_H
 #include <stdint.h>
 
+	void *device_capture_start(void*);
 	int device_capture(const char*);
 
 	struct macaddr_list_item {
