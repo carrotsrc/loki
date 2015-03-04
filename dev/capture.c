@@ -15,9 +15,12 @@ static void process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct 
 static void process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static char *elements_get_ssid(uint8_t*, uint16_t);
 
+static void print_beacons(struct frame_log *log, WINDOW *handle);
 void *device_capture_start(void *data) {
 	device_capture((struct loki_state*)data);
 }
+
+
 
 int device_capture(struct loki_state *state) {
 
@@ -87,6 +90,7 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	switch(mctrl->subtype) {
 	case BEACON:
 		process_beacon((uint8_t*)manhdr, mctrl, sz, log);
+		print_beacons(log, state->screen->centre->port);
 		break;
 
 	case PROBE_REQUEST:
@@ -264,4 +268,17 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 		addr_item->prev = item->tail;
 		addr_item->next = NULL;
 	}
+}
+
+static void print_beacons(struct frame_log *log, WINDOW *handle) {
+	wmove(handle, 1 , 1);
+	wprintw(handle, "Beacon Frames\n--------------\n\n");
+	struct beacon_frame_item *item = log->beacon.list;
+	if(item == NULL)
+		return;
+
+	do {
+		wprintw(handle, "%s\n", item->ssid);
+	} while( (item = item->next) != NULL);
+	wrefresh(handle);
 }

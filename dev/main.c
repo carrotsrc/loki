@@ -86,10 +86,12 @@ int main( int argc, char *argv[]) {
 	screen = screen_start();
 
 	vleft = create_view(2, 2, (COLS/3), LINES-4);
+	vcentre = create_view(COLS/3+2, 2, (COLS/3), LINES-4);
 	scrollok(vleft->port, TRUE);
 	idlok(vleft->port, TRUE);
 
 	screen->left = vleft;
+	screen->centre = vcentre;
 	lstate.screen = screen;
 
 	printf("device is up\n", dev);
