@@ -4,7 +4,8 @@
 #include <ncurses.h>
 
 struct view {
-	uint16_t x, y, width, height;
+	uint16_t x, y, w, h;
+	WINDOW *port;
 };
 
 struct screen {
@@ -12,6 +13,10 @@ struct screen {
 };
 
 struct screen *screen_start();
+struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t);
+
 void screen_stop(struct screen*);
+
 void screen_refresh(struct screen*);
+void view_refresh(struct view*);
 #endif

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <netinet/if_ether.h>
+#include <ncurses.h>
 
 #include "monitor.h"
 #include "capture.h"
@@ -38,11 +39,15 @@ static int ifconfig_device_down(const char *dev) {
 }
 
 
+
 int main( int argc, char *argv[]) {
 
 	pthread_t tcap, tui;
+	struct screen *screen = NULL;
+	char *addr, *dev;
+	int r;
 
-	char *addr = "192.168.0.1";
+	addr = "192.168.0.1";
 	if(argc < 2) {
 		fprintf(stderr, "Device unspecified\n");
 		exit(EXIT_FAILURE);
@@ -52,8 +57,8 @@ int main( int argc, char *argv[]) {
 		addr = argv[2];
 	}
 
-	char *dev = argv[1];
-	int r = 0;
+	dev = argv[1];
+	r = 0;
 
 	/* switch on monitor mode using libnl */
 	if(set_monitor_mode(dev) > 0) {
@@ -78,11 +83,16 @@ int main( int argc, char *argv[]) {
 	if(pthread_create( &tcap, NULL, device_capture_start, (void*)dev) != 0) {
 		printf("Failed to start capture thread\n");
 		exit(EXIT_FAILURE);
-		
 	}
-	//device_capture(dev);
+
+	screen = screen_start();
+	printw("Loki Capture");
+	screen_refresh(screen);
 	/* bring device down */
 	//ifconfig_device_down(dev);
-
+	getch();
+	screen_stop(screen);
 	exit(EXIT_SUCCESS);
 }
+
+
