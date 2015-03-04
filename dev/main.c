@@ -4,11 +4,10 @@
 #include <netinet/if_ether.h>
 #include <ncurses.h>
 
+#include "state.h"
 #include "monitor.h"
 #include "capture.h"
 #include "view/screen.h"
-
-
 
 /* TODO:
  * this needs to be researched more deeply
@@ -44,8 +43,12 @@ int main( int argc, char *argv[]) {
 
 	pthread_t tcap, tui;
 	struct screen *screen = NULL;
+	struct view *vleft = NULL, *vright = NULL, *vcentre = NULL;
+	struct loki_state lstate;
 	char *addr, *dev;
 	int r;
+
+	cbreak();
 
 	addr = "192.168.0.1";
 	if(argc < 2) {
@@ -67,6 +70,9 @@ int main( int argc, char *argv[]) {
 	}
 	/* If we're here then we should be in monitor mode.
 	 */
+
+	lstate.dev = dev;
+
 	r = ifconfig_device_up(dev, addr);
 	if(r != EXIT_SUCCESS) {
 
@@ -80,18 +86,34 @@ int main( int argc, char *argv[]) {
 	printf("device is up\n", dev);
 	/* device is now up */
 
-	if(pthread_create( &tcap, NULL, device_capture_start, (void*)dev) != 0) {
+	if(pthread_create( &tcap, NULL, device_capture_start, (void*)&lstate) != 0) {
 		printf("Failed to start capture thread\n");
 		exit(EXIT_FAILURE);
 	}
 
+
 	screen = screen_start();
+
+	vleft = create_view(0, 2, (COLS/3), LINES-4);
+	screen->left = vleft;
+
 	printw("Loki Capture");
+	scrollok(vleft->port, TRUE);
+	idlok(vleft->port, TRUE);
+	wmove(vleft->port, 1, 1);
 	screen_refresh(screen);
+
+	int i  = 0;
+	do {
+		wprintw(vleft->port, "Raw Feed %d\n", i);
+		view_refresh(vleft);
+	} while(i++ < 100001);
+
+
 	/* bring device down */
-	//ifconfig_device_down(dev);
 	getch();
 	screen_stop(screen);
+	ifconfig_device_down(dev);
 	exit(EXIT_SUCCESS);
 }
 

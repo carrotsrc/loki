@@ -15,17 +15,20 @@ static void process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, 
 static char *elements_get_ssid(uint8_t*, uint16_t);
 
 void *device_capture_start(void *data) {
-	device_capture((const char*)data);
+	device_capture((struct loki_state*)data);
 }
 
-int device_capture(const char *dev) {
+int device_capture(struct loki_state *state) {
 
 	pcap_t *handle = NULL;
-	char errbuf[PCAP_ERRBUF_SIZE], *filter = NULL;
+	char errbuf[PCAP_ERRBUF_SIZE], *filter = NULL, *dev;
 	bpf_u_int32 ipaddr, netmask;
 	struct bpf_program fp;
 	const u_char *packet = NULL;
 	struct frame_log log = (const struct frame_log){0};
+
+	dev = state->dev;
+	state->log = (void*)&log;
 
 
 	if(pcap_lookupnet(dev, &ipaddr, &netmask, errbuf) == -1) {
@@ -50,7 +53,7 @@ int device_capture(const char *dev) {
 		return 1;
 	}
 
-	if(pcap_loop(handle, 0, capture_cb, (u_char*)&log) == -1) {
+	if(pcap_loop(handle, 0, capture_cb, (u_char*)state) == -1) {
 		fprintf(stderr, "Error on capture loop\n");
 		pcap_close(handle);
 		return 1;
@@ -65,12 +68,13 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
 	uint16_t eth_begin = 0, sz = 0, hsize = 0;
 
+	struct loki_state *state;
 	struct mac80211_management_hdr *manhdr = NULL;
 	struct mac80211_control *mctrl = NULL;
 	struct frame_log *log = NULL;
 	
-	
-	log = (struct frame_log*) args;
+	state = (struct loki_state*) args;
+	log = (struct frame_log*) state->log;
 
 	eth_begin = ((struct pkth_radiotap*)packet)->len;
 	sz = header->len - eth_begin;

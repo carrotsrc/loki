@@ -9,10 +9,10 @@ struct screen *screen_start() {
 }
 
 void screen_refresh(struct screen *screen) {
+	refresh();
+
 	if(screen->left != NULL)
 		view_refresh(screen->left);
-
-	refresh();
 }
 
 void screen_stop(struct screen *screen) {
@@ -29,6 +29,7 @@ struct view *create_view(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
 
 	view->port = newwin(h,w,y,x);
 	box(view->port, 0, 0);
+
 	return view;
 }
 
