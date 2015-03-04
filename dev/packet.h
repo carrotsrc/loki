@@ -1,6 +1,7 @@
 #ifndef PACKET_H
 #define PACKET_H
 #include <stdint.h>
+#include <ncurses.h>
 struct pkth_radiotap {
 	uint8_t version;
 	uint8_t pad;
@@ -82,8 +83,8 @@ struct mac80211_control {
 
 };
 
-void printraw_packet(const unsigned char*, unsigned int);
-void printraw_management_frame(const uint8_t*, uint16_t);
+void printraw_packet(const unsigned char*, unsigned int, WINDOW *handle);
+void printraw_management_frame(const uint8_t*, uint16_t, WINDOW*);
 void print_mac_address(uint8_t*);
 struct mac80211_control *decode_mac80211_control(uint16_t);
 #endif

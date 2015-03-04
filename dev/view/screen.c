@@ -28,7 +28,6 @@ struct view *create_view(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
 	view->h = h;
 
 	view->port = newwin(h,w,y,x);
-	box(view->port, 0, 0);
 
 	return view;
 }

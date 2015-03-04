@@ -83,6 +83,15 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	screen = screen_start();
+
+	vleft = create_view(2, 2, (COLS/3), LINES-4);
+	scrollok(vleft->port, TRUE);
+	idlok(vleft->port, TRUE);
+
+	screen->left = vleft;
+	lstate.screen = screen;
+
 	printf("device is up\n", dev);
 	/* device is now up */
 
@@ -92,22 +101,12 @@ int main( int argc, char *argv[]) {
 	}
 
 
-	screen = screen_start();
-
-	vleft = create_view(0, 2, (COLS/3), LINES-4);
-	screen->left = vleft;
 
 	printw("Loki Capture");
-	scrollok(vleft->port, TRUE);
-	idlok(vleft->port, TRUE);
 	wmove(vleft->port, 1, 1);
 	screen_refresh(screen);
 
-	int i  = 0;
-	do {
-		wprintw(vleft->port, "Raw Feed %d\n", i);
-		view_refresh(vleft);
-	} while(i++ < 100001);
+	wprintw(vleft->port, "Raw Feed\n");
 
 
 	/* bring device down */

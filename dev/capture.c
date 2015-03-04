@@ -1,6 +1,7 @@
 #include <pcap.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "capture.h"
 #include "packet.h"
 /* pcap callback for reading a packet */
@@ -66,6 +67,7 @@ int device_capture(struct loki_state *state) {
 
 void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
 
+	static int packetCheck = 0;
 	uint16_t eth_begin = 0, sz = 0, hsize = 0;
 
 	struct loki_state *state;
@@ -94,8 +96,13 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		free(mctrl);
 		return;
 	}
-	//printraw_management_frame(packet, header->len);
-	//printf("-----------\n\n\n");
+
+	if( packetCheck++%100 == 0 ) {
+		packetCheck = 0;
+		printraw_management_frame(packet, header->len, state->screen->left->port);
+		wprintw(state->screen->left->port, "-----------\n\n\n");
+		view_refresh(state->screen->left);
+	}
 	free(mctrl);
 
 }
