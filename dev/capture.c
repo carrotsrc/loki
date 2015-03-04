@@ -11,8 +11,8 @@ static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, c
 static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, char*);
 static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item*, uint8_t*);
 
-static void process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
-static void process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
+static unsigned int process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
+static unsigned int process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static char *elements_get_ssid(uint8_t*, uint16_t);
 
 static void print_beacons(struct frame_log *log, WINDOW *handle);
@@ -89,8 +89,12 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
 	switch(mctrl->subtype) {
 	case BEACON:
-		process_beacon((uint8_t*)manhdr, mctrl, sz, log);
-		print_beacons(log, state->screen->centre->port);
+		if(process_beacon((uint8_t*)manhdr, mctrl, sz, log))
+			print_beacons(log, state->screen->centre->port);
+
+		wmove(state->screen->centre->port, 2, 8);
+		wprintw(state->screen->centre->port, "%ld", log->beacon.num);
+		//view_refresh(state->screen->centre);
 		break;
 
 	case PROBE_REQUEST:
@@ -101,13 +105,16 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		return;
 	}
 
-	if( packetCheck++%100 == 0 ) {
+	if( packetCheck++%500 == 0 ) {
+		wattron(state->screen->left->port, COLOR_PAIR(1));
 		packetCheck = 0;
 		printraw_management_frame(packet, header->len, state->screen->left->port);
 		wprintw(state->screen->left->port, "-----------\n\n\n");
-		view_refresh(state->screen->left);
+		//view_refresh(state->screen->left);
 	}
 	free(mctrl);
+
+	screen_refresh(state->screen);
 
 }
 
@@ -144,9 +151,10 @@ static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item *li
 	return NULL;
 }
 
-static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
+static unsigned int process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
 
 	struct mac80211_beacon_fixed *beacon_fixed = NULL;
+	unsigned int modified = 0;
 	short drop = 4;
 	if(mctrl->order)
 		drop = 0;
@@ -177,11 +185,13 @@ static void process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint1
 		item->count = 0;
 		item->next = NULL;
 		log->beacon.num++;
+		modified = 1;
 	} else {
 		free(ssid);
 	}
 
 	item->count++;
+	return modified;
 }
 
 static char *elements_get_ssid(uint8_t *elements, uint16_t len) {
@@ -209,14 +219,15 @@ static char *elements_get_ssid(uint8_t *elements, uint16_t len) {
 		ptr += e[1];
 
 	} while(ptr <= end);
-
+	
 	return NULL;
 
 }
 
-static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
+static unsigned int process_probe_request(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
 
 	struct mac80211_beacon_fixed *beacon_fixed = NULL;
+	unsigned int modified = 0;
 	short drop = 4;
 	if(mctrl->order)
 		drop = 0;
@@ -247,6 +258,7 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 		item->count = 0;
 		item->next = NULL;
 		log->proberq.num++;
+		modified  = 1;
 	} else {
 		free(ssid);
 	}
@@ -268,11 +280,13 @@ static void process_probe_request(uint8_t *frame, struct mac80211_control *mctrl
 		addr_item->prev = item->tail;
 		addr_item->next = NULL;
 	}
+
+	return modified;
 }
 
 static void print_beacons(struct frame_log *log, WINDOW *handle) {
-	wmove(handle, 1 , 1);
-	wprintw(handle, "Beacon Frames\n--------------\n\n");
+	wmove(handle, 0 , 0);
+	wprintw(handle, "Beacon Frames\n--------------\nTotal: \n\n");
 	struct beacon_frame_item *item = log->beacon.list;
 	if(item == NULL)
 		return;

@@ -84,7 +84,9 @@ int main( int argc, char *argv[]) {
 	}
 
 	screen = screen_start();
-
+	start_color();
+	use_default_colors();
+	init_pair(1, COLOR_GREEN, -1);
 	vleft = create_view(2, 2, (COLS/3), LINES-4);
 	vcentre = create_view(COLS/3+2, 2, (COLS/3), LINES-4);
 	scrollok(vleft->port, TRUE);
@@ -104,7 +106,7 @@ int main( int argc, char *argv[]) {
 
 
 
-	printw("Loki Capture");
+	printw("Loki Capture | ");
 	wmove(vleft->port, 1, 1);
 	screen_refresh(screen);
 

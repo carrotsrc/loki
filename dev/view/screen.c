@@ -13,6 +13,12 @@ void screen_refresh(struct screen *screen) {
 
 	if(screen->left != NULL)
 		view_refresh(screen->left);
+
+	if(screen->centre != NULL)
+		view_refresh(screen->centre);
+
+	if(screen->right != NULL)
+		view_refresh(screen->right);
 }
 
 void screen_stop(struct screen *screen) {
