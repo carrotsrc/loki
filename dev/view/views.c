@@ -59,9 +59,12 @@ void print_overview_centre(struct loki_state *state, WINDOW *handle) {
 	struct beacon_frame_item *item = ((struct frame_log*)state->log)->beacon.list;
 	if(item == NULL)
 		return;
-
+	int i = 0;
 	do {
-		wprintw(handle, "%s\n", item->ssid);
+		if(i++ == state->log->beacon.selected)
+			wprintw(handle, "> %s\n", item->ssid);
+		else
+			wprintw(handle, "  %s\n", item->ssid);
 	} while( (item = item->next) != NULL);
 
 	wmove(handle, 2, 8);
@@ -75,8 +78,13 @@ void print_overview_right(struct loki_state *state, WINDOW *handle) {
 	if(item == NULL)
 		return;
 
+	int i = 0;
 	do {
-		wprintw(handle, "%ld\t%s\n", item->count, item->ssid);
+		if(i++ == state->log->proberq.selected)
+			wprintw(handle, "> %ld\t%s\n", item->count, item->ssid);
+		else
+			wprintw(handle, "  %ld\t%s\n", item->count, item->ssid);
+
 	} while( (item = item->next) != NULL);
 
 	wmove(handle, 2, 8);

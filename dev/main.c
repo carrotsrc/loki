@@ -109,6 +109,7 @@ static void input_loop(struct loki_state *state) {
 
 	while((code = getch()) != 'q') {
 		state->current_controller->input(code, state);
+		write_screen(state->current);
 	}
 }
 
