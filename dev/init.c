@@ -39,5 +39,16 @@ void create_screens(struct loki_state *state) {
 
 
 void create_controllers(struct loki_state *state) {
-	
+	struct mode_controller *controller;
+	// Build the overview mode controller
+	controller = create_mode_controller();
+
+	controller->left = create_controller();
+	controller->centre = create_controller();
+	controller->right = create_controller();
+	controller->selected = controller->centre;
+
+	state->controllers.overview = controller;
+
+	state->current_controller = state->controllers.overview;
 }

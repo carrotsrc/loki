@@ -25,6 +25,6 @@ struct loki_state {
 	} controllers;
 
 	struct screen *current;
-	struct controller *current_controller;
+	struct mode_controller *current_controller;
 };
 #endif
