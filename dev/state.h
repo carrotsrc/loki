@@ -1,6 +1,7 @@
 #ifndef STATE_H
 #define STATE_H
 #include "view/screen.h"
+#include "capture.h"
 
 enum loki_mode {
 	OVERVIEW = 0,
@@ -10,7 +11,7 @@ enum loki_mode {
 
 struct loki_state {
 	char *dev;
-	void *log;
+	struct frame_log *log;
 	struct screen_list {
 		struct screen *overview;
 		struct screen *ap;

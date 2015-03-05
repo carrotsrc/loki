@@ -13,6 +13,7 @@ set( SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/capture.c
 	${CMAKE_CURRENT_SOURCE_DIR}/view/screen.c
 	${CMAKE_CURRENT_SOURCE_DIR}/view/views.c
+	${CMAKE_CURRENT_SOURCE_DIR}/controller/controllers.c
 	${CMAKE_CURRENT_SOURCE_DIR}/main.c
 )
 
