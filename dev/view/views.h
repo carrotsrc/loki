@@ -7,7 +7,6 @@ struct view {
 	uint16_t x, y, w, h;
 	WINDOW *port;
 	callback_view_print write;
-//	void (*write)(struct loki_state*,WINDOW*);
 };
 
 struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t, callback_view_print);

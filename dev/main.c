@@ -115,16 +115,20 @@ static void input_loop(struct loki_state *state) {
 			state->current = state->screens.overview;
 			screen_refresh(state->current);
 			break;
+
 		case 'b':
 			state->mode == FOCUS_AP;
 			state->current = state->screens.ap;
 			screen_refresh(state->current);
 			break;
-
+		case 'j':
+			break;
 		}
 	}
 }
 
+/** Construct all the screens and their views that are used in lokicap
+ */
 static void create_screens(struct loki_state *state) {
 	struct screen *screen = NULL;
 	struct view *vleft = NULL, *vright = NULL, *vcentre = NULL;
@@ -136,7 +140,7 @@ static void create_screens(struct loki_state *state) {
 	idlok(vleft->port, TRUE);
 
 	screen = create_screen();
-	screen->left = vleft; // only create one left
+	screen->left = vleft; // only use one raw feed
 	screen->centre = vcentre;
 	screen->right = vright;
 
@@ -146,7 +150,7 @@ static void create_screens(struct loki_state *state) {
 	vright = create_view(89, 2, (COLS/3), LINES-4, NULL);
 	screen = create_screen();
 
-	screen->left = vleft;
+	screen->left = vleft; // only use one raw feed
 	screen->centre = vcentre;
 	screen->right = vright;
 	state->screens.ap = screen;
@@ -155,7 +159,7 @@ static void create_screens(struct loki_state *state) {
 	vright = create_view(89, 2, (COLS/3), LINES-4, NULL);
 	screen = create_screen();
 
-	screen->left = vleft;
+	screen->left = vleft; // only use one raw feed
 	screen->centre = vcentre;
 	screen->right = vright;
 	state->screens.sta = screen;
