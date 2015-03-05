@@ -45,23 +45,6 @@ void screen_stop(struct screen *screen) {
 	endwin();
 }
 
-struct view *create_view(uint16_t x, uint16_t y, uint16_t w, uint16_t h, void (*cb)(struct loki_state*,WINDOW*)) {
-
-	struct view *view = (struct view*) malloc(sizeof(struct view));
-	view->x = x; 
-	view->y = y; 
-	view->w = w; 
-	view->h = h;
-	view->write = cb;
-
-	view->port = newwin(h,w,y,x);
-
-	return view;
-}
-
-void view_refresh(struct view *view) {
-	wnoutrefresh(view->port);
-}
 
 void init_ncurses() {
 	initscr();

@@ -8,7 +8,6 @@
 #include "monitor.h"
 #include "capture.h"
 #include "view/screen.h"
-#include "view/views.h"
 
 /* TODO:
  * this needs to be researched more deeply
