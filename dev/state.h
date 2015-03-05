@@ -2,6 +2,12 @@
 #define STATE_H
 #include "view/screen.h"
 
+enum loki_mode {
+	OVERVIEW = 0,
+	FOCUS_AP,
+	FOCUS_STA
+};
+
 struct loki_state {
 	char *dev;
 	void *log;
@@ -11,11 +17,6 @@ struct loki_state {
 		struct screen *sta;
 	} screens;
 	struct screen *current;
-};
-
-enum Mode {
-	overview = 0,
-	focus_ap,
-	focus_sta
+	enum loki_mode mode;
 };
 #endif
