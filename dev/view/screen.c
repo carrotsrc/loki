@@ -10,14 +10,19 @@ struct screen *create_screen() {
 
 void write_screen(struct screen *screen, struct loki_state *state) {
 	pthread_mutex_lock(&scrmutex);
-	if(screen->left != NULL)
+	if(screen->left != NULL) {
 		screen->left->write(state, screen->left->port);
+	}
 
-	if(screen->centre != NULL)
+	if(screen->centre != NULL) {
+		werase(screen->centre->port);
 		screen->centre->write(state, screen->centre->port);
+	}
 
-	if(screen->right != NULL)
+	if(screen->right != NULL) {
+		werase(screen->right->port);
 		screen->right->write(state, screen->right->port);
+	}
 
 	move(0,15);
 	printw("Total Packets: %ld | ", ((struct frame_log*)(state->log))->totalPackets);
