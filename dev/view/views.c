@@ -2,6 +2,12 @@
 #include "capture.h"
 
 void print_overview_left(struct loki_state *state, WINDOW *handle) {
+	char *packet = NULL;
+	if(( packet = ((struct frame_log*)state->log)->lastPacket) != NULL) {
+		wprintw(handle, "%s\n---------\n\n", packet);
+		free(packet);
+		((struct frame_log*)state->log)->lastPacket = NULL;
+	}
 }
 
 void print_overview_centre(struct loki_state *state, WINDOW *handle) {

@@ -109,8 +109,8 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	if( (packetCheck%50) == 0 ) {
 		wattron(state->screens.overview->left->port, COLOR_PAIR(1));
 		packetCheck = 0;
-		printraw_management_frame(packet, header->len, state->screens.overview->left->port);
-		wprintw(state->screens.overview->left->port, "-----------\n\n\n");
+		char *formatted = printraw_management_frame(packet, header->len);
+		log->lastPacket = formatted;
 	}
 	free(mctrl);
 	write_screen(state->current, state);

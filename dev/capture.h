@@ -38,5 +38,6 @@
 			struct proberq_frame_item *list, *tail;
 		} proberq;
 
+		char *lastPacket;
 	};
 #endif

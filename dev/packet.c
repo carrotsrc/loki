@@ -11,10 +11,10 @@ void print_mac_address(uint8_t *address) {
 	}
 }
 
-void printraw_packet(const unsigned char *packet, unsigned int len, WINDOW *handle) {
+char *printraw_packet(const unsigned char *packet, unsigned int len) {
 	unsigned int i = 0, j = 0;
 	char *buf, *bptr;
-	bptr = buf = malloc((len*3)+(len>>4)+10);
+	bptr = buf = malloc((len*3)+(len>>4)+11);
 
 	while(i < len) {
 		sprintf(bptr, "%02x ", packet[i++]);
@@ -24,8 +24,8 @@ void printraw_packet(const unsigned char *packet, unsigned int len, WINDOW *hand
 			j = 0;
 		}
 	}
-	wprintw(handle, "%s", buf);
-	free(buf);
+	bptr = '\0';
+	return buf;
 }
 
 struct mac80211_control *decode_mac80211_control(uint16_t cf) {
@@ -67,17 +67,18 @@ struct mac80211_control *decode_mac80211_control(uint16_t cf) {
 	return fields;
 }
 
-void printraw_management_frame(const uint8_t *packet, uint16_t len, WINDOW *handle) {
+char *printraw_management_frame(const uint8_t *packet, uint16_t len) {
 	uint8_t mac_begin, hsize;
+	size_t fsize;
 	struct mac80211_management_hdr *manhdr = NULL;
 	struct mac80211_control *mctrl = NULL;
+	char *sradio, *smanhdr, *smanframe, *formatted;
 
 	mac_begin = ((struct pkth_radiotap*)packet)->len;
 	len -= mac_begin;
 
 	// Print radiotap header
-	printraw_packet((uint8_t*)packet, mac_begin, handle);
-	wprintw(handle, "\n\n");
+	sradio = printraw_packet((uint8_t*)packet, mac_begin);
 
 	manhdr = (struct mac80211_management_hdr*) ((uint8_t*)packet+mac_begin);
 	mctrl = decode_mac80211_control(manhdr->control);
@@ -86,12 +87,17 @@ void printraw_management_frame(const uint8_t *packet, uint16_t len, WINDOW *hand
 	len -= hsize;
 
 	// print managament header
-	printraw_packet((uint8_t*)manhdr, hsize, handle);
-	wprintw(handle, "\n\n");
+	smanhdr = printraw_packet((uint8_t*)manhdr, hsize);
 
 	// print frame body
-	printraw_packet((uint8_t*)manhdr+hsize, len, handle);
-	wprintw(handle, "\n\n");
+	smanframe = printraw_packet((uint8_t*)manhdr+hsize, len);
 
+	fsize = strlen(sradio) + strlen(smanhdr) + strlen(smanframe) + 6;
+	formatted = (char*)malloc(sizeof(char)*fsize);
 
+	sprintf(formatted, "%s\n\n%s\n\n%s\n", sradio, smanhdr, smanframe);
+	free(sradio);
+	free(smanhdr);
+	free(smanframe);
+	return formatted;
 }
