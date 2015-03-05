@@ -86,6 +86,7 @@ int main( int argc, char *argv[]) {
 
 	init_ncurses();
 	create_screens(&lstate);
+	create_controllers(&lstate);
 
 	if(pthread_create( &tcap, NULL, device_capture_start, (void*)&lstate) != 0) {
 		printf("Failed to start capture thread\n");
@@ -107,20 +108,7 @@ static void input_loop(struct loki_state *state) {
 	int code = 0;
 
 	while((code = getch()) != 'q') {
-		switch(code) {
-		case 'o':
-		case 27:
-			state->current = state->screens.overview;
-			screen_refresh(state->current);
-			break;
-
-		case 'b':
-			state->current = state->screens.ap;
-			screen_refresh(state->current);
-			break;
-		case 'j':
-			break;
-		}
+		state->current_controller->input(code, state);
 	}
 }
 

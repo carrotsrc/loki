@@ -44,9 +44,16 @@ void create_controllers(struct loki_state *state) {
 	controller = create_mode_controller();
 
 	controller->left = create_controller();
+	controller->left->input = &controller_overview_left;
+
 	controller->centre = create_controller();
+	controller->centre->input = &controller_overview_centre;
+	
 	controller->right = create_controller();
+	controller->right->input = &controller_overview_right;
+
 	controller->selected = controller->centre;
+	controller->input = &controller_overview_mode;
 
 	state->controllers.overview = controller;
 
