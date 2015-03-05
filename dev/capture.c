@@ -7,16 +7,13 @@
 /* pcap callback for reading a packet */
 static void capture_cb(u_char*, const struct pcap_pkthdr*, const u_char*);
 
-static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, char*);
-static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, char*);
+static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, const char*);
+static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, const char*);
 static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item*, uint8_t*);
 
 static unsigned int process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static unsigned int process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static char *elements_get_ssid(uint8_t*, uint16_t);
-
-static void print_beacons(struct frame_log *log, WINDOW *handle);
-static void print_proberq(struct frame_log *log, WINDOW *handle);
 
 void *device_capture_start(void *data) {
 	device_capture((struct loki_state*)data);
@@ -98,15 +95,10 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	switch(mctrl->subtype) {
 	case BEACON:
 		process_beacon((uint8_t*)manhdr, mctrl, sz, log);
-		/*wmove(state->screens.overview->centre->port, 2, 8);
-		wprintw(state->screens.overview->centre->port, "%ld", log->beacon.num);*/
 		break;
 
 	case PROBE_REQUEST:
 		process_probe_request((uint8_t*)manhdr, mctrl, sz, log);
-		print_proberq(log, state->screens.overview->right->port);
-		wmove(state->screens.overview->right->port, 2, 8);
-		wprintw(state->screens.overview->right->port, "%ld", log->proberq.num);
 		break;
 	default:
 		free(mctrl);
@@ -125,7 +117,7 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
 }
 
-static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item *list, char *value) {
+static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item *list, const char *value) {
 	if(list == NULL)
 		return NULL;
 
@@ -136,7 +128,7 @@ static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item *li
 	return NULL;
 }
 
-static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item *list, char *value) {
+static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item *list, const char *value) {
 	if(list == NULL)
 		return NULL;
 
@@ -213,10 +205,12 @@ static char *elements_get_ssid(uint8_t *elements, uint16_t len) {
 
 		if(e[0] == 0) {
 			if(e[1] == 0) {
-				ssid = (char*) malloc(sizeof(char)*2);
-				ssid = "*\0";
+				while((ssid = (char*) malloc(sizeof(char)*2)) == NULL)
+					continue;
+				strcpy(ssid, "*\0");
 			} else {
-				ssid = (char*) malloc(sizeof(char) * e[1]+1);
+				while((ssid = (char*) malloc(sizeof(char) * e[1]+1)) == NULL)
+					continue;
 				memcpy(ssid, ptr, e[1]);
 				ssid[e[1]] = '\0';
 			}
@@ -226,7 +220,7 @@ static char *elements_get_ssid(uint8_t *elements, uint16_t len) {
 		ptr += e[1];
 
 	} while(ptr <= end);
-	
+
 	return NULL;
 
 }
@@ -242,8 +236,13 @@ static unsigned int process_probe_request(uint8_t *frame, struct mac80211_contro
 	short hsize = sizeof(struct mac80211_management_hdr)-drop;
 
 	char *ssid = elements_get_ssid((uint8_t*)frame+hsize, (len-hsize));
-	if(ssid == NULL || ssid[0] == '*')
+	if(ssid == NULL)
 		return;
+
+	if(ssid[0] == '*') {
+		free(ssid);
+		return;
+	}
 
 	struct proberq_frame_item *item = NULL;
 
@@ -289,28 +288,4 @@ static unsigned int process_probe_request(uint8_t *frame, struct mac80211_contro
 	}
 
 	return modified;
-}
-
-static void print_beacons(struct frame_log *log, WINDOW *handle) {
-	wmove(handle, 0 , 0);
-	wprintw(handle, "Beacon Frames\n--------------\nTotal: \n\n");
-	struct beacon_frame_item *item = log->beacon.list;
-	if(item == NULL)
-		return;
-
-	do {
-		wprintw(handle, "%s\n", item->ssid);
-	} while( (item = item->next) != NULL);
-}
-
-static void print_proberq(struct frame_log *log, WINDOW *handle) {
-	wmove(handle, 0 , 0);
-	wprintw(handle, "Probe Requests\n--------------\nTotal: \n\n");
-	struct proberq_frame_item *item = log->proberq.list;
-	if(item == NULL)
-		return;
-
-	do {
-		wprintw(handle, "%ld\t%s\n", item->count, item->ssid);
-	} while( (item = item->next) != NULL);
 }
