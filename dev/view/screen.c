@@ -19,6 +19,7 @@ void screen_refresh(struct screen *screen) {
 	if(screen->right != NULL)
 		view_refresh(screen->right);
 
+	move(LINES-1, 1);
 	doupdate();
 }
 
@@ -47,6 +48,7 @@ void init_ncurses() {
 	initscr();
 	start_color();
 	use_default_colors();
+	noecho();
 
 	init_pair(1, COLOR_GREEN, -1);
 }

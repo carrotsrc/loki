@@ -36,7 +36,7 @@ static int ifconfig_device_down(const char *dev) {
 }
 
 static void create_screens(struct loki_state*);
-
+static void input_loop(struct loki_state*);
 int main( int argc, char *argv[]) {
 
 	pthread_t tcap, tui;
@@ -79,11 +79,12 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	/* device is now up */
+	printf("device is up\n", dev);
+
+
 	init_ncurses();
 	create_screens(&lstate);
-
-	printf("device is up\n", dev);
-	/* device is now up */
 
 	if(pthread_create( &tcap, NULL, device_capture_start, (void*)&lstate) != 0) {
 		printf("Failed to start capture thread\n");
@@ -93,11 +94,19 @@ int main( int argc, char *argv[]) {
 	printw("Loki Capture | ");
 	screen_refresh(lstate.current);
 
-	/* bring device down */
-	getch();
+	input_loop(&lstate);
 	screen_stop(lstate.current);
+
+	/* bring device down */
 	ifconfig_device_down(dev);
 	exit(EXIT_SUCCESS);
+}
+static void input_loop(struct loki_state *state) {
+	int code = 0;
+
+	while((code = getch()) != 'q') {
+		
+	}
 }
 
 static void create_screens(struct loki_state *state) {
