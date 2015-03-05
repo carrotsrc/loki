@@ -123,7 +123,7 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 		wprintw(state->screens.overview->left->port, "-----------\n\n\n");
 	}
 	free(mctrl);
-
+	write_screen(state->current, state);
 	screen_refresh(state->current);
 
 }

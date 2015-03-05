@@ -2,10 +2,12 @@
 #define SCREEN_H
 #include <stdint.h>
 #include <ncurses.h>
+#include "state.h"
 
 struct view {
 	uint16_t x, y, w, h;
 	WINDOW *port;
+	void (*write)(struct loki_state*);
 };
 
 struct screen {
@@ -13,7 +15,7 @@ struct screen {
 };
 
 struct screen *create_screen();
-struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t);
+struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t, void(*cb)(struct loki_state*));
 
 void screen_stop(struct screen*);
 
