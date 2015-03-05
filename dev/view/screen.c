@@ -9,7 +9,7 @@ struct screen *create_screen() {
 }
 
 void write_screen(struct screen *screen, struct loki_state *state) {
-	
+	pthread_mutex_lock(&scrmutex);
 	if(screen->left != NULL)
 		screen->left->write(state, screen->left->port);
 
@@ -23,6 +23,7 @@ void write_screen(struct screen *screen, struct loki_state *state) {
 	printw("Total Packets: %ld | ", ((struct frame_log*)(state->log))->totalPackets);
 
 	screen_refresh(screen);
+	pthread_mutex_unlock(&scrmutex);
 }
 
 void screen_refresh(struct screen *screen) {

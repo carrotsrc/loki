@@ -1,5 +1,6 @@
 #ifndef STATE_H
 #define STATE_H
+#include <pthread.h>
 #include "view/screen.h"
 #include "capture.h"
 
@@ -26,5 +27,8 @@ struct loki_state {
 
 	struct screen *current;
 	struct mode_controller *current_controller;
+
 };
+
+static pthread_mutex_t scrmutex;
 #endif
