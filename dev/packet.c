@@ -1,16 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "packet.h"
-void print_mac_address(uint8_t *address) {
-
-	int i = 0;
-	while(i < 6) {
-		if(i > 0)
-			printf(" : ");
-		printf("%02x", address[i++]);
-	}
-}
-
 char *printraw_packet(const unsigned char *packet, unsigned int len) {
 	unsigned int i = 0, j = 0;
 	char *buf, *bptr;

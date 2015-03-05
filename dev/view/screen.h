@@ -15,7 +15,7 @@ struct screen {
 };
 
 struct screen *create_screen();
-struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t, void(*cb)(struct loki_state*,WINDOW*));
+struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t, void(*)(struct loki_state*,WINDOW*));
 
 void screen_stop(struct screen*);
 

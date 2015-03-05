@@ -1,5 +1,27 @@
 #include "views.h"
 #include "capture.h"
+#include <stdlib.h>
+
+char *print_mac_address(uint8_t *address) {
+	char *faddr, *floc;
+
+	faddr  = (char*)malloc(sizeof(char)*32);
+	floc = faddr;
+	int i = 0;
+
+	while(i < 6) {
+		if(i > 0) {
+			sprintf(floc, " : ");
+			floc += 3;
+		}
+		sprintf(floc, "%02x", address[i++]);
+		floc += 2;
+	}
+
+	floc = '\0';
+	return faddr;
+}
+
 
 void print_overview_left(struct loki_state *state, WINDOW *handle) {
 	char *packet = NULL;
@@ -13,6 +35,7 @@ void print_overview_left(struct loki_state *state, WINDOW *handle) {
 void print_overview_centre(struct loki_state *state, WINDOW *handle) {
 	wmove(handle, 0 , 0);
 	wprintw(handle, "Beacon Frames\n-------------\nTotal: \n\n");
+
 	struct beacon_frame_item *item = ((struct frame_log*)state->log)->beacon.list;
 	if(item == NULL)
 		return;
