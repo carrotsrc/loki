@@ -53,6 +53,7 @@ void controller_overview_right(int code, struct frame_log *log) {
 		else
 			log->proberq.selected = log->proberq.num-1;
 
+		
 		break;
 	}
 }
@@ -72,9 +73,28 @@ void controller_overview_mode(int code, struct loki_state *state) {
 			state->log->proberq.selected = -1;
 		}
 		break;
+
 	case 'j':
 	case 'k':
 		state->controllers.overview->selected->input(code, state->log);
+		break;
+
+	case '\n':
+		pthread_mutex_lock(&scrmutex);
+		state->current_controller = state->controllers.ap;
+		state->current = state->screens.ap;
+		pthread_mutex_unlock(&scrmutex);
+		break;
+	}
+}
+
+void controller_ap_mode(int code, struct loki_state *state) {
+	switch(code) {
+	case 0x1b:
+		pthread_mutex_lock(&scrmutex);
+		state->current_controller = state->controllers.overview;
+		state->current = state->screens.overview;
+		pthread_mutex_unlock(&scrmutex);
 		break;
 	}
 }

@@ -91,3 +91,16 @@ void print_overview_right(struct loki_state *state, WINDOW *handle) {
 	wprintw(handle, "%ld", ((struct frame_log*)state->log)->proberq.num);
 
 }
+
+void print_ap_left(struct loki_state *state, WINDOW *handle) {
+}
+
+void print_ap_centre(struct loki_state *state, WINDOW *handle) {
+	wmove(handle, 0 , 0);
+	wprintw(handle, "HELLO WORLD");
+}
+
+void print_ap_right(struct loki_state *state, WINDOW *handle) {
+	wmove(handle, 0 , 0);
+	wprintw(handle, "HELLO RIGHT");
+}
