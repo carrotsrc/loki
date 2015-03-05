@@ -28,8 +28,6 @@ static int ifconfig_device_up(const char *dev, const char *address) {
 }
 
 static int ifconfig_device_down(const char *dev) {
-
-
 	char ifcfg[20];
 	sprintf(ifcfg, "ifconfig %s down", dev);
 	printf("$ %s\n", ifcfg);
@@ -37,13 +35,11 @@ static int ifconfig_device_down(const char *dev) {
 	return system(ifcfg);
 }
 
-
+static void create_screens(struct loki_state*);
 
 int main( int argc, char *argv[]) {
 
 	pthread_t tcap, tui;
-	struct screen *screen = NULL;
-	struct view *vleft = NULL, *vright = NULL, *vcentre = NULL;
 	struct loki_state lstate;
 	char *addr, *dev;
 	int r;
@@ -83,18 +79,8 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	screen = screen_start();
-	start_color();
-	use_default_colors();
-	init_pair(1, COLOR_GREEN, -1);
-	vleft = create_view(2, 2, (COLS/3), LINES-4);
-	vcentre = create_view(COLS/3+2, 2, (COLS/3), LINES-4);
-	scrollok(vleft->port, TRUE);
-	idlok(vleft->port, TRUE);
-
-	screen->left = vleft;
-	screen->centre = vcentre;
-	lstate.screen = screen;
+	init_ncurses();
+	create_screens(&lstate);
 
 	printf("device is up\n", dev);
 	/* device is now up */
@@ -104,20 +90,48 @@ int main( int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-
-
 	printw("Loki Capture | ");
-	wmove(vleft->port, 1, 1);
-	screen_refresh(screen);
-
-	wprintw(vleft->port, "Raw Feed\n");
-
+	screen_refresh(lstate.current);
 
 	/* bring device down */
 	getch();
-	screen_stop(screen);
+	screen_stop(lstate.current);
 	ifconfig_device_down(dev);
 	exit(EXIT_SUCCESS);
 }
 
+static void create_screens(struct loki_state *state) {
+	struct screen *screen = NULL;
+	struct view *vleft = NULL, *vright = NULL, *vcentre = NULL;
 
+	vleft = create_view(2, 2, 50, LINES-4);
+	vcentre = create_view(52, 2, 37, LINES-4);
+	vright = create_view(89, 2, (COLS/3), LINES-4);
+	scrollok(vleft->port, TRUE);
+	idlok(vleft->port, TRUE);
+
+	screen = create_screen();
+	screen->left = vleft; // only create one left
+	screen->centre = vcentre;
+	screen->right = vright;
+
+	state->current = state->screens.overview = screen;
+
+	vcentre = create_view(52, 2, 37, LINES-4);
+	vright = create_view(89, 2, (COLS/3), LINES-4);
+	screen = create_screen();
+
+	screen->left = vleft;
+	screen->centre = vcentre;
+	screen->right = vright;
+	state->screens.ap = screen;
+
+	vcentre = create_view(52, 2, 37, LINES-4);
+	vright = create_view(89, 2, (COLS/3), LINES-4);
+	screen = create_screen();
+
+	screen->left = vleft;
+	screen->centre = vcentre;
+	screen->right = vright;
+	state->screens.sta = screen;
+}

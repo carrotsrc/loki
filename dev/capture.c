@@ -16,6 +16,8 @@ static unsigned int process_probe_request(uint8_t*, struct mac80211_control*, ui
 static char *elements_get_ssid(uint8_t*, uint16_t);
 
 static void print_beacons(struct frame_log *log, WINDOW *handle);
+static void print_proberq(struct frame_log *log, WINDOW *handle);
+
 void *device_capture_start(void *data) {
 	device_capture((struct loki_state*)data);
 }
@@ -71,6 +73,7 @@ int device_capture(struct loki_state *state) {
 void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
 
 	static int packetCheck = 0;
+	static long long totalPackets = 0;
 	uint16_t eth_begin = 0, sz = 0, hsize = 0;
 
 	struct loki_state *state;
@@ -78,6 +81,11 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	struct mac80211_control *mctrl = NULL;
 	struct frame_log *log = NULL;
 	
+	totalPackets++;
+
+	move(0,15);
+	printw("Total Packets: %ld | ", totalPackets);
+
 	state = (struct loki_state*) args;
 	log = (struct frame_log*) state->log;
 
@@ -90,31 +98,33 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	switch(mctrl->subtype) {
 	case BEACON:
 		if(process_beacon((uint8_t*)manhdr, mctrl, sz, log))
-			print_beacons(log, state->screen->centre->port);
+			print_beacons(log, state->screens.overview->centre->port);
 
-		wmove(state->screen->centre->port, 2, 8);
-		wprintw(state->screen->centre->port, "%ld", log->beacon.num);
-		//view_refresh(state->screen->centre);
+		wmove(state->screens.overview->centre->port, 2, 8);
+		wprintw(state->screens.overview->centre->port, "%ld", log->beacon.num);
 		break;
 
 	case PROBE_REQUEST:
 		process_probe_request((uint8_t*)manhdr, mctrl, sz, log);
+		print_proberq(log, state->screens.overview->right->port);
+		wmove(state->screens.overview->right->port, 2, 8);
+		wprintw(state->screens.overview->right->port, "%ld", log->proberq.num);
 		break;
 	default:
 		free(mctrl);
 		return;
 	}
 
-	if( packetCheck++%500 == 0 ) {
-		wattron(state->screen->left->port, COLOR_PAIR(1));
+	packetCheck++;
+	if( (packetCheck%50) == 0 ) {
+		wattron(state->screens.overview->left->port, COLOR_PAIR(1));
 		packetCheck = 0;
-		printraw_management_frame(packet, header->len, state->screen->left->port);
-		wprintw(state->screen->left->port, "-----------\n\n\n");
-		//view_refresh(state->screen->left);
+		printraw_management_frame(packet, header->len, state->screens.overview->left->port);
+		wprintw(state->screens.overview->left->port, "-----------\n\n\n");
 	}
 	free(mctrl);
 
-	screen_refresh(state->screen);
+	screen_refresh(state->current);
 
 }
 
@@ -294,5 +304,16 @@ static void print_beacons(struct frame_log *log, WINDOW *handle) {
 	do {
 		wprintw(handle, "%s\n", item->ssid);
 	} while( (item = item->next) != NULL);
-	wrefresh(handle);
+}
+
+static void print_proberq(struct frame_log *log, WINDOW *handle) {
+	wmove(handle, 0 , 0);
+	wprintw(handle, "Probe Requests\n--------------\nTotal: \n\n");
+	struct proberq_frame_item *item = log->proberq.list;
+	if(item == NULL)
+		return;
+
+	do {
+		wprintw(handle, "%ld\t%s\n", item->count, item->ssid);
+	} while( (item = item->next) != NULL);
 }

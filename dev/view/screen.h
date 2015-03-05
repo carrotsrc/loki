@@ -12,11 +12,12 @@ struct screen {
 	struct view *left, *centre, *right;
 };
 
-struct screen *screen_start();
+struct screen *create_screen();
 struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t);
 
 void screen_stop(struct screen*);
 
 void screen_refresh(struct screen*);
 void view_refresh(struct view*);
+void init_ncurses();
 #endif

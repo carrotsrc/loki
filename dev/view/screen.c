@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "screen.h"
-struct screen *screen_start() {
-	initscr();
+struct screen *create_screen() {
 
 	struct screen *screen = (struct screen*) malloc(sizeof(struct screen));
 	screen->left = screen->centre = screen->right = NULL;
@@ -19,6 +18,8 @@ void screen_refresh(struct screen *screen) {
 
 	if(screen->right != NULL)
 		view_refresh(screen->right);
+
+	doupdate();
 }
 
 void screen_stop(struct screen *screen) {
@@ -39,6 +40,14 @@ struct view *create_view(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
 }
 
 void view_refresh(struct view *view) {
-	wrefresh(view->port);
+	wnoutrefresh(view->port);
+}
+
+void init_ncurses() {
+	initscr();
+	start_color();
+	use_default_colors();
+
+	init_pair(1, COLOR_GREEN, -1);
 }
 
