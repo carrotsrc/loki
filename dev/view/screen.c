@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "screen.h"
+#include "capture.h"
 struct screen *create_screen() {
 
 	struct screen *screen = (struct screen*) malloc(sizeof(struct screen));
@@ -17,6 +18,9 @@ void write_screen(struct screen *screen, struct loki_state *state) {
 
 	if(screen->right != NULL)
 		screen->right->write(state, screen->right->port);
+
+	move(0,15);
+	printw("Total Packets: %ld | ", ((struct frame_log*)(state->log))->totalPackets);
 
 	screen_refresh(screen);
 }

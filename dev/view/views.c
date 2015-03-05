@@ -28,7 +28,7 @@ void print_overview_centre(struct loki_state *state, WINDOW *handle) {
 void print_overview_right(struct loki_state *state, WINDOW *handle) {
 	wmove(handle, 0 , 0);
 	wprintw(handle, "Probe Requests\n--------------\nTotal: \n\n");
-	struct proberq_frame_item *item = ((struct frame_log*)state->log)->proberq.list;
+	struct proberq_frame_item *item = ((struct frame_log*)(state->log))->proberq.list;
 	if(item == NULL)
 		return;
 

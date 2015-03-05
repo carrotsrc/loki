@@ -78,13 +78,11 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	struct mac80211_control *mctrl = NULL;
 	struct frame_log *log = NULL;
 	
-	totalPackets++;
 
-	move(0,15);
-	printw("Total Packets: %ld | ", totalPackets);
 
 	state = (struct loki_state*) args;
 	log = (struct frame_log*) state->log;
+	log->totalPackets++;
 
 	eth_begin = ((struct pkth_radiotap*)packet)->len;
 	sz = header->len - eth_begin;

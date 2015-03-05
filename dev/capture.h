@@ -39,5 +39,6 @@
 		} proberq;
 
 		char *lastPacket;
+		long long totalPackets;
 	};
 #endif
