@@ -4,7 +4,6 @@
 #include "state.h"
 
 	void *device_capture_start(void*);
-	int device_capture(struct loki_state *);
 
 	struct macaddr_list_item {
 		struct macaddr_list_item *prev, *next;

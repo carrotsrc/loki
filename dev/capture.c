@@ -4,16 +4,20 @@
 
 #include "capture.h"
 #include "packet.h"
+
+static int device_capture(struct loki_state *);
+
 /* pcap callback for reading a packet */
 static void capture_cb(u_char*, const struct pcap_pkthdr*, const u_char*);
 
 static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, const char*);
 static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, const char*);
 static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item*, uint8_t*);
+static char *elements_get_ssid(uint8_t*, uint16_t);
+
 
 static unsigned int process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
 static unsigned int process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
-static char *elements_get_ssid(uint8_t*, uint16_t);
 
 void *device_capture_start(void *data) {
 	device_capture((struct loki_state*)data);
