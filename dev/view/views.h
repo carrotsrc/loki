@@ -16,7 +16,9 @@ void print_overview_left(struct loki_state*,WINDOW*);
 void print_overview_centre(struct loki_state*,WINDOW*);
 void print_overview_right(struct loki_state*,WINDOW*);
 
-void print_ap_left(struct loki_state*,WINDOW*);
 void print_ap_centre(struct loki_state*,WINDOW*);
 void print_ap_right(struct loki_state*,WINDOW*);
+
+void print_sta_centre(struct loki_state*,WINDOW*);
+void print_sta_right(struct loki_state*,WINDOW*);
 #endif

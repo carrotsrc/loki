@@ -31,8 +31,8 @@ void create_screens(struct loki_state *state) {
 	state->screens.ap = screen;
 
 	// Station focus
-	vcentre = create_view(52, 2, 37, LINES-4, NULL);
-	vright = create_view(89, 2, (COLS/3), LINES-4, NULL);
+	vcentre = create_view(52, 2, 37, LINES-4, &print_sta_centre);
+	vright = create_view(89, 2, (COLS/3), LINES-4, &print_sta_centre);
 	screen = create_screen();
 
 	screen->left = vleft; // only use one raw feed
@@ -79,4 +79,21 @@ void create_controllers(struct loki_state *state) {
 	controller->input = &controller_ap_mode;
 
 	state->controllers.ap = controller;
+
+	// Build the AP mode controller
+	controller = create_mode_controller();
+
+	controller->left = create_controller();
+	controller->left->input = NULL;
+
+	controller->centre = create_controller();
+	controller->centre->input = NULL;
+	
+	controller->right = create_controller();
+	controller->right->input = NULL;
+
+	controller->selected = controller->centre;
+	controller->input = &controller_sta_mode;
+
+	state->controllers.sta = controller;
 }

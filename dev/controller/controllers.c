@@ -81,14 +81,31 @@ void controller_overview_mode(int code, struct loki_state *state) {
 
 	case '\n':
 		pthread_mutex_lock(&scrmutex);
-		state->current_controller = state->controllers.ap;
-		state->current = state->screens.ap;
-		pthread_mutex_unlock(&scrmutex);
+		if(state->controllers.overview->selected == state->controllers.overview->centre) {
+			state->current_controller = state->controllers.ap;
+			state->current = state->screens.ap;
+			pthread_mutex_unlock(&scrmutex);
+		} else {
+			state->current_controller = state->controllers.sta;
+			state->current = state->screens.sta;
+			pthread_mutex_unlock(&scrmutex);
+		}
 		break;
 	}
 }
 
 void controller_ap_mode(int code, struct loki_state *state) {
+	switch(code) {
+	case 0x1b:
+		pthread_mutex_lock(&scrmutex);
+		state->current_controller = state->controllers.overview;
+		state->current = state->screens.overview;
+		pthread_mutex_unlock(&scrmutex);
+		break;
+	}
+}
+
+void controller_sta_mode(int code, struct loki_state *state) {
 	switch(code) {
 	case 0x1b:
 		pthread_mutex_lock(&scrmutex);

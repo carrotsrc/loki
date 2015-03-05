@@ -97,10 +97,20 @@ void print_ap_left(struct loki_state *state, WINDOW *handle) {
 
 void print_ap_centre(struct loki_state *state, WINDOW *handle) {
 	wmove(handle, 0 , 0);
-	wprintw(handle, "HELLO WORLD");
+	wprintw(handle, "AP CENTRE");
 }
 
 void print_ap_right(struct loki_state *state, WINDOW *handle) {
 	wmove(handle, 0 , 0);
-	wprintw(handle, "HELLO RIGHT");
+	wprintw(handle, "AP RIGHT");
+}
+
+void print_sta_centre(struct loki_state *state, WINDOW *handle) {
+	wmove(handle, 0 , 0);
+	wprintw(handle, "STA CENTRE");
+}
+
+void print_sta_right(struct loki_state *state, WINDOW *handle) {
+	wmove(handle, 0 , 0);
+	wprintw(handle, "STA RIGHT");
 }

@@ -29,4 +29,5 @@ void controller_overview_right(int, struct frame_log*);
 
 void controller_overview_mode(int, struct loki_state*);
 void controller_ap_mode(int, struct loki_state*);
+void controller_sta_mode(int, struct loki_state*);
 #endif
