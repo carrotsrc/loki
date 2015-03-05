@@ -10,14 +10,15 @@ struct screen *create_screen() {
 void write_screen(struct screen *screen, struct loki_state *state) {
 	
 	if(screen->left != NULL)
-		screen->left->write(state);
+		screen->left->write(state, screen->left->port);
 
 	if(screen->centre != NULL)
-		screen->centre->write(state);
+		screen->centre->write(state, screen->centre->port);
 
 	if(screen->right != NULL)
-		screen->right->write(state);
+		screen->right->write(state, screen->right->port);
 
+	screen_refresh(screen);
 }
 
 void screen_refresh(struct screen *screen) {
@@ -40,7 +41,7 @@ void screen_stop(struct screen *screen) {
 	endwin();
 }
 
-struct view *create_view(uint16_t x, uint16_t y, uint16_t w, uint16_t h, void (*cb)(struct loki_state*)) {
+struct view *create_view(uint16_t x, uint16_t y, uint16_t w, uint16_t h, void (*cb)(struct loki_state*,WINDOW*)) {
 
 	struct view *view = (struct view*) malloc(sizeof(struct view));
 	view->x = x; 

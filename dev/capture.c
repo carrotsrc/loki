@@ -97,11 +97,9 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
 	switch(mctrl->subtype) {
 	case BEACON:
-		if(process_beacon((uint8_t*)manhdr, mctrl, sz, log))
-			print_beacons(log, state->screens.overview->centre->port);
-
-		wmove(state->screens.overview->centre->port, 2, 8);
-		wprintw(state->screens.overview->centre->port, "%ld", log->beacon.num);
+		process_beacon((uint8_t*)manhdr, mctrl, sz, log);
+		/*wmove(state->screens.overview->centre->port, 2, 8);
+		wprintw(state->screens.overview->centre->port, "%ld", log->beacon.num);*/
 		break;
 
 	case PROBE_REQUEST:
@@ -124,7 +122,6 @@ void capture_cb(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	}
 	free(mctrl);
 	write_screen(state->current, state);
-	screen_refresh(state->current);
 
 }
 

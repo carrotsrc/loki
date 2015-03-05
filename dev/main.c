@@ -14,6 +14,9 @@
  * this needs to be researched more deeply
  * to see what net-tools is up to...
  */
+static void create_screens(struct loki_state*);
+static void input_loop(struct loki_state*);
+
 static int ifconfig_device_up(const char *dev, const char *address) {
 
 
@@ -36,8 +39,6 @@ static int ifconfig_device_down(const char *dev) {
 	return system(ifcfg);
 }
 
-static void create_screens(struct loki_state*);
-static void input_loop(struct loki_state*);
 int main( int argc, char *argv[]) {
 
 	pthread_t tcap, tui;
@@ -129,9 +130,9 @@ static void create_screens(struct loki_state *state) {
 	struct screen *screen = NULL;
 	struct view *vleft = NULL, *vright = NULL, *vcentre = NULL;
 
-	vleft = create_view(2, 2, 50, LINES-4, &print_overview);
-	vcentre = create_view(52, 2, 37, LINES-4, &print_overview);
-	vright = create_view(89, 2, (COLS/3), LINES-4, &print_overview);
+	vleft = create_view(2, 2, 50, LINES-4, &print_overview_centre);
+	vcentre = create_view(52, 2, 37, LINES-4, &print_overview_centre);
+	vright = create_view(89, 2, (COLS/3), LINES-4, &print_overview_centre);
 	scrollok(vleft->port, TRUE);
 	idlok(vleft->port, TRUE);
 
@@ -142,8 +143,8 @@ static void create_screens(struct loki_state *state) {
 
 	state->current = state->screens.overview = screen;
 
-	vcentre = create_view(52, 2, 37, LINES-4, &print_overview);
-	vright = create_view(89, 2, (COLS/3), LINES-4, &print_overview);
+	vcentre = create_view(52, 2, 37, LINES-4, NULL);
+	vright = create_view(89, 2, (COLS/3), LINES-4, NULL);
 	screen = create_screen();
 
 	screen->left = vleft;
@@ -151,8 +152,8 @@ static void create_screens(struct loki_state *state) {
 	screen->right = vright;
 	state->screens.ap = screen;
 
-	vcentre = create_view(52, 2, 37, LINES-4, &print_overview);
-	vright = create_view(89, 2, (COLS/3), LINES-4, &print_overview);
+	vcentre = create_view(52, 2, 37, LINES-4, NULL);
+	vright = create_view(89, 2, (COLS/3), LINES-4, NULL);
 	screen = create_screen();
 
 	screen->left = vleft;

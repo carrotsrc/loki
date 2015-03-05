@@ -7,7 +7,7 @@
 struct view {
 	uint16_t x, y, w, h;
 	WINDOW *port;
-	void (*write)(struct loki_state*);
+	void (*write)(struct loki_state*,WINDOW*);
 };
 
 struct screen {
@@ -15,7 +15,7 @@ struct screen {
 };
 
 struct screen *create_screen();
-struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t, void(*cb)(struct loki_state*));
+struct view *create_view(uint16_t,uint16_t,uint16_t,uint16_t, void(*cb)(struct loki_state*,WINDOW*));
 
 void screen_stop(struct screen*);
 
