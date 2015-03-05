@@ -31,8 +31,8 @@ char *print_mac_address(uint8_t *address) {
 
 	while(i < 6) {
 		if(i > 0) {
-			sprintf(floc, " : ");
-			floc += 3;
+			sprintf(floc, ":");
+			floc += 1;
 		}
 		sprintf(floc, "%02x", address[i++]);
 		floc += 2;
@@ -96,8 +96,18 @@ void print_ap_left(struct loki_state *state, WINDOW *handle) {
 }
 
 void print_ap_centre(struct loki_state *state, WINDOW *handle) {
+	struct beacon_frame_item *item = state->log->beacon.list;
+	int i = 0;
+	do {
+		if(i++ == state->log->beacon.selected)
+			break;
+	} while( (item = item->next) != NULL);
+
 	wmove(handle, 0 , 0);
-	wprintw(handle, "AP CENTRE");
+	wprintw(handle, "Access Point\n");
+	wprintw(handle, "------------\n");
+	wprintw(handle, "%s\nMAC: %s\n", item->ssid, print_mac_address(item->mac));
+	wprintw(handle, "Beacon Frames: %ld\n", item->count);
 }
 
 void print_ap_right(struct loki_state *state, WINDOW *handle) {
@@ -106,8 +116,22 @@ void print_ap_right(struct loki_state *state, WINDOW *handle) {
 }
 
 void print_sta_centre(struct loki_state *state, WINDOW *handle) {
+	struct macaddr_list_item *mitem;
+	struct proberq_frame_item *item = state->log->proberq.list;
+	int i = 0;
+	do {
+		if(i++ == state->log->proberq.selected)
+			break;
+	} while( (item = item->next) != NULL);
+
 	wmove(handle, 0 , 0);
-	wprintw(handle, "STA CENTRE");
+	wprintw(handle, "Probes\n");
+	wprintw(handle, "------\n");
+	wprintw(handle, "%s\n", item->ssid);
+	mitem = item->list;
+	do {
+		wprintw(handle, "%s\n", print_mac_address(mitem->addr));
+	} while( (mitem = mitem->next) != NULL);
 }
 
 void print_sta_right(struct loki_state *state, WINDOW *handle) {

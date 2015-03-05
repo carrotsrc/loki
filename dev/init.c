@@ -32,7 +32,7 @@ void create_screens(struct loki_state *state) {
 
 	// Station focus
 	vcentre = create_view(52, 2, 37, LINES-4, &print_sta_centre);
-	vright = create_view(89, 2, (COLS/3), LINES-4, &print_sta_centre);
+	vright = create_view(89, 2, (COLS/3), LINES-4, &print_sta_right);
 	screen = create_screen();
 
 	screen->left = vleft; // only use one raw feed
