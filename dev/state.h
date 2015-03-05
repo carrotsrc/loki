@@ -16,7 +16,11 @@ struct loki_state {
 		struct screen *ap;
 		struct screen *sta;
 	} screens;
+
+	struct controller_list {
+		struct controller *overview;
+	} controllers;
 	struct screen *current;
-	enum loki_mode mode;
+	struct controller *current_controller;
 };
 #endif

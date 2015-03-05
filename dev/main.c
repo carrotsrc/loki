@@ -47,8 +47,6 @@ int main( int argc, char *argv[]) {
 
 	cbreak();
 
-	lstate.mode = OVERVIEW;
-
 	addr = "192.168.0.1";
 	if(argc < 2) {
 		fprintf(stderr, "Device unspecified\n");
@@ -104,6 +102,7 @@ int main( int argc, char *argv[]) {
 	ifconfig_device_down(dev);
 	exit(EXIT_SUCCESS);
 }
+
 static void input_loop(struct loki_state *state) {
 	int code = 0;
 
@@ -111,13 +110,11 @@ static void input_loop(struct loki_state *state) {
 		switch(code) {
 		case 'o':
 		case 27:
-			state->mode == OVERVIEW;
 			state->current = state->screens.overview;
 			screen_refresh(state->current);
 			break;
 
 		case 'b':
-			state->mode == FOCUS_AP;
 			state->current = state->screens.ap;
 			screen_refresh(state->current);
 			break;

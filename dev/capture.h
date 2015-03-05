@@ -28,12 +28,14 @@
 
 	struct frame_log {
 		struct b_list {
-			int num;
+			uint16_t num;
+			int16_t selected;
 			struct beacon_frame_item *list, *tail;
 		} beacon;
 
 		struct prq_list {
-			int num;
+			uint16_t num;
+			int16_t selected;
 			struct proberq_frame_item *list, *tail;
 		} proberq;
 
