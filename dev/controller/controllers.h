@@ -9,6 +9,11 @@ struct controller {
 	controller_callback input;
 };
 
-void switch_controller(struct loki_state*, struct controller*);
+struct mode_controller {
+	controller_callback input;
+	struct controller *left, *centre, *right;
+};
 
+void switch_controller(struct loki_state*, struct controller*);
+struct mode_controller *create_mode_controller();
 #endif
