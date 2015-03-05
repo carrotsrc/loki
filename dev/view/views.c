@@ -1,6 +1,8 @@
+#include <string.h>
+#include <stdlib.h>
+
 #include "views.h"
 #include "capture.h"
-#include <stdlib.h>
 
 struct view *create_view(uint16_t x, uint16_t y, uint16_t w, uint16_t h, void (*cb)(struct loki_state*,WINDOW*)) {
 

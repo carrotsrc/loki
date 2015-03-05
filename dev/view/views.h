@@ -1,5 +1,6 @@
 #ifndef VIEWS_H
 #define VIEWS_H
+struct loki_state;
 #include "state.h"
 typedef void(*callback_view_print)(struct loki_state*,WINDOW*);
 

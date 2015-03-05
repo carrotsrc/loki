@@ -16,4 +16,5 @@ struct mode_controller {
 
 void switch_controller(struct loki_state*, struct controller*);
 struct mode_controller *create_mode_controller();
+struct controller *create_controller();
 #endif

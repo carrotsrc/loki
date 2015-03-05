@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "packet.h"
 char *printraw_packet(const unsigned char *packet, unsigned int len) {
 	unsigned int i = 0, j = 0;

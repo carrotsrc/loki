@@ -19,8 +19,11 @@ struct loki_state {
 	} screens;
 
 	struct controller_list {
-		struct controller *overview;
+		struct mode_controller *overview;
+		struct mode_controller *ap;
+		struct mode_controller *sta;
 	} controllers;
+
 	struct screen *current;
 	struct controller *current_controller;
 };
