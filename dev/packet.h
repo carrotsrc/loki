@@ -34,7 +34,7 @@ struct mac80211_data {
 	uint16_t duration_id;
 	uint8_t ra[6];
 	
-}
+} __attribute__((__packed__));
 
 struct mac80211_beacon_fixed {
 	uint8_t timestamp[8]; ///< Timestamp
@@ -64,7 +64,7 @@ enum mac80211_subtype_management {
 	PROBE_REQUEST,
 	PROBE_RESPONSE,
 	TIMING_AD,
-	RESERVED_A,
+	MANAGEMENT_RESERVED_A,
 	BEACON,
 	ATIM,
 	DISASSOC,
@@ -72,11 +72,11 @@ enum mac80211_subtype_management {
 	DEAUTH,
 	ACTION,
 	ACTION_NO_ACK,
-	RESERVED_B
+	MANAGEMENT_RESERVED_B
 };
 
 enum mac80211_subtype_data {
-	DATA,
+	DATA_DATA,
 	DATA_CF_ACK,
 	DATA_CF_POLL,
 	DATA_CF_ACK_CF_POLL,
@@ -89,16 +89,16 @@ enum mac80211_subtype_data {
 	QOS_DATA_CF_POLL,
 	QOS_DATA_CF_ACK_CF_POLL,
 	QOS_DATA_NULL,
-	RESERVED,
+	DATA_RESERVED_A,
 	QOS_CF_POLL,
 	QOS_CF_ACK_CF_POLL,
-	RESERVED
+	DATA_RESERVED_B
 };
 
 struct mac80211_control {
 	uint8_t protocol;
 	enum mac80211_control_type type;
-	enum mac80211_subtype_management subtype;
+	uint8_t subtype;
 	uint8_t toDS;
 	uint8_t fromDS;
 	uint8_t frags;

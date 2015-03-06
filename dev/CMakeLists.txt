@@ -10,6 +10,7 @@ set( EXTRA_LIBS ${EXTRA_LIBS} -lpcap -lnl-genl-3 -lnl-3 -lncurses -lpthread )
 set( SRC 
 	${CMAKE_CURRENT_SOURCE_DIR}/packet.c
 	${CMAKE_CURRENT_SOURCE_DIR}/monitor.c
+	${CMAKE_CURRENT_SOURCE_DIR}/frameproc.c
 	${CMAKE_CURRENT_SOURCE_DIR}/capture.c
 	${CMAKE_CURRENT_SOURCE_DIR}/view/screen.c
 	${CMAKE_CURRENT_SOURCE_DIR}/view/views.c
