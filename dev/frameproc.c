@@ -15,6 +15,8 @@ static char *elements_get_ssid(uint8_t*, uint16_t);
 static unsigned int process_beacon(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
 static unsigned int process_probe_request(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
 
+static unsigned int process_data(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
+
 uint8_t filter_frame(const uint8_t *packet, uint16_t len, struct loki_state *state) {
 	uint8_t ret;
 	uint16_t eth_begin = 0, sz = 0, hsize = 0;
@@ -34,8 +36,8 @@ uint8_t filter_frame(const uint8_t *packet, uint16_t len, struct loki_state *sta
 		break;
 	
 	case DATA:
-		printf("Found data");
-		ret = 1;
+		filter_frame_data((uint8_t*)(packet+eth_begin), sz, mctrl, state);
+		ret = 0; // don't write the packet
 		break;
 	
 	default:
@@ -239,4 +241,22 @@ static uint8_t filter_frame_management(const uint8_t *packet, uint16_t len, cons
 	}
 
 	return 1;
+}
+
+static uint8_t filter_frame_data(const uint8_t *packet, uint16_t len, const struct mac80211_control *mctrl, struct loki_state *state) {
+	struct mac80211_management_hdr *manhdr = NULL;
+
+	manhdr = (struct mac80211_management_hdr*)packet;
+
+	switch(mctrl->subtype) {
+	case DATA_DATA:
+
+		break;
+	}
+
+	return 0;
+}
+
+static unsigned int process_data(const uint8_t *frame, const struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
+
 }

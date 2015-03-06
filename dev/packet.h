@@ -33,7 +33,11 @@ struct mac80211_data {
 	uint16_t control;
 	uint16_t duration_id;
 	uint8_t ra[6];
-	
+	uint8_t sa[6];
+	uint16_t seqctrl; ///< Sequence Control
+	uint8_t bssid[6];
+	uint16_t qos;
+	uint32_t htctrl; ///< HT Control - present if control.order = 1
 } __attribute__((__packed__));
 
 struct mac80211_beacon_fixed {
