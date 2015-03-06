@@ -3,16 +3,20 @@
 
 #include "frameproc.h"
 
+static uint8_t filter_frame_management(const uint8_t*, uint16_t, const struct mac80211_control*, struct loki_state*);
+static uint8_t filter_frame_data(const uint8_t*, uint16_t, const struct mac80211_control*, struct loki_state*);
+
 static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, const char*);
 static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, const char*);
 static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item*, uint8_t*);
 static char *elements_get_ssid(uint8_t*, uint16_t);
 
 
-static unsigned int process_beacon(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
-static unsigned int process_probe_request(uint8_t*, struct mac80211_control*, uint16_t, struct frame_log*);
+static unsigned int process_beacon(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
+static unsigned int process_probe_request(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
 
 uint8_t filter_frame(const uint8_t *packet, uint16_t len, struct loki_state *state) {
+	uint8_t ret;
 	uint16_t eth_begin = 0, sz = 0, hsize = 0;
 
 	struct mac80211_management_hdr *manhdr = NULL;
@@ -23,22 +27,26 @@ uint8_t filter_frame(const uint8_t *packet, uint16_t len, struct loki_state *sta
 
 	manhdr = (struct mac80211_management_hdr*) (packet+eth_begin);
 	mctrl = decode_mac80211_control(manhdr->control);
-
-	switch(mctrl->subtype) {
-	case BEACON:
-		process_beacon((uint8_t*)manhdr, mctrl, sz, state->log);
+	
+	switch(mctrl->type) {
+	case MANAGEMENT:
+		ret = filter_frame_management((uint8_t*)(packet+eth_begin), sz, mctrl, state);
 		break;
-
-	case PROBE_REQUEST:
-		process_probe_request((uint8_t*)manhdr, mctrl, sz, state->log);
+	
+	case DATA:
+		printf("Found data");
+		ret = 1;
 		break;
+	
 	default:
-		free(mctrl);
-		return 0;
+		ret = 0;
+		break;
+
 	}
 
 	free(mctrl);
-	return 1;
+
+	return ret;
 }
 
 static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item *list, const char *value) {
@@ -74,7 +82,7 @@ static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item *li
 	return NULL;
 }
 
-static unsigned int process_beacon(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
+static unsigned int process_beacon(const uint8_t *frame, const struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
 
 	struct mac80211_beacon_fixed *beacon_fixed = NULL;
 	unsigned int modified = 0;
@@ -149,7 +157,7 @@ static char *elements_get_ssid(uint8_t *elements, uint16_t len) {
 
 }
 
-static unsigned int process_probe_request(uint8_t *frame, struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
+static unsigned int process_probe_request(const uint8_t *frame, const struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
 
 	struct mac80211_beacon_fixed *beacon_fixed = NULL;
 	unsigned int modified = 0;
@@ -212,4 +220,23 @@ static unsigned int process_probe_request(uint8_t *frame, struct mac80211_contro
 	}
 
 	return modified;
+}
+
+static uint8_t filter_frame_management(const uint8_t *packet, uint16_t len, const struct mac80211_control *mctrl, struct loki_state *state) {
+	struct mac80211_management_hdr *manhdr = NULL;
+
+	manhdr = (struct mac80211_management_hdr*)packet;
+	switch(mctrl->subtype) {
+	case BEACON:
+		process_beacon((uint8_t*)manhdr, mctrl, len, state->log);
+		break;
+
+	case PROBE_REQUEST:
+		process_probe_request((uint8_t*)manhdr, mctrl, len, state->log);
+		break;
+	default:
+		return 0;
+	}
+
+	return 1;
 }
