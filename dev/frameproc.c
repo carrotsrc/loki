@@ -8,7 +8,10 @@ static uint8_t filter_frame_data(const uint8_t*, uint16_t, const struct mac80211
 
 static struct beacon_frame_item *beacon_ssid_exists(struct beacon_frame_item*, const char*);
 static struct proberq_frame_item *proberq_ssid_exists(struct proberq_frame_item*, const char*);
+
 static struct macaddr_list_item *proberq_mac_exists(struct macaddr_list_item*, uint8_t*);
+static struct beacon_frame_item *beacon_mac_exists(struct beacon_frame_item*, uint8_t*);
+
 static char *elements_get_ssid(uint8_t*, uint16_t);
 
 
@@ -245,11 +248,7 @@ static uint8_t filter_frame_management(const uint8_t *packet, uint16_t len, cons
 
 static uint8_t filter_frame_data(const uint8_t *packet, uint16_t len, const struct mac80211_control *mctrl, struct loki_state *state) {
 
-	switch(mctrl->subtype) {
-	case QOS_DATA:
-		process_data(packet, mctrl, len, state->log);
-		break;
-	}
+	process_data(packet, mctrl, len, state->log);
 
 	return 0;
 }
@@ -262,6 +261,18 @@ static unsigned int process_data(const uint8_t *frame, const struct mac80211_con
 		//printw("From distribution system");
 	} else
 	if(mctrl->fromDS == 0 && mctrl->toDS == 1) {
-		printw("To distribution system");
+		if(beacon_mac_exists(log->beacon.list, datahdr->ra) != NULL)
+			printw("Match found");
 	}
+}
+
+static struct beacon_frame_item *beacon_mac_exists(struct beacon_frame_item *list, uint8_t *value) {
+	if(list == NULL)
+		return NULL;
+
+	do {
+		if(memcmp(list->mac, value, 6) == 0)
+			return list;
+	} while((list = list->next) != NULL);
+	return NULL;
 }
