@@ -13,6 +13,7 @@ struct beacon_frame_item {
 	uint8_t mac[6], ssid_len;
 	char *ssid;
 	uint64_t count;
+	struct macaddr_list_item *list, *tail;
 };
 
 struct proberq_frame_item {
@@ -29,6 +30,7 @@ struct frame_log {
 		uint16_t num;
 		int16_t selected;
 		struct beacon_frame_item *list, *tail;
+
 	} beacon;
 
 	struct prq_list {

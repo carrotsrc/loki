@@ -22,25 +22,6 @@ void view_refresh(struct view *view) {
 	wnoutrefresh(view->port);
 }
 
-char *print_mac_address(uint8_t *address) {
-	char *faddr, *floc;
-
-	faddr  = (char*)malloc(sizeof(char)*32);
-	floc = faddr;
-	int i = 0;
-
-	while(i < 6) {
-		if(i > 0) {
-			sprintf(floc, ":");
-			floc += 1;
-		}
-		sprintf(floc, "%02x", address[i++]);
-		floc += 2;
-	}
-
-	floc = '\0';
-	return faddr;
-}
 
 
 void print_overview_left(struct loki_state *state, WINDOW *handle) {

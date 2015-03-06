@@ -92,3 +92,23 @@ char *printraw_management_frame(const uint8_t *packet, uint16_t len) {
 	free(smanframe);
 	return formatted;
 }
+
+char *print_mac_address(uint8_t *address) {
+	char *faddr, *floc;
+
+	faddr  = (char*)malloc(sizeof(char)*32);
+	floc = faddr;
+	int i = 0;
+
+	while(i < 6) {
+		if(i > 0) {
+			sprintf(floc, ":");
+			floc += 1;
+		}
+		sprintf(floc, "%02x", address[i++]);
+		floc += 2;
+	}
+
+	floc = '\0';
+	return faddr;
+}

@@ -244,13 +244,10 @@ static uint8_t filter_frame_management(const uint8_t *packet, uint16_t len, cons
 }
 
 static uint8_t filter_frame_data(const uint8_t *packet, uint16_t len, const struct mac80211_control *mctrl, struct loki_state *state) {
-	struct mac80211_management_hdr *manhdr = NULL;
-
-	manhdr = (struct mac80211_management_hdr*)packet;
 
 	switch(mctrl->subtype) {
-	case DATA_DATA:
-
+	case QOS_DATA:
+		process_data(packet, mctrl, len, state->log);
 		break;
 	}
 
@@ -258,5 +255,13 @@ static uint8_t filter_frame_data(const uint8_t *packet, uint16_t len, const stru
 }
 
 static unsigned int process_data(const uint8_t *frame, const struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
+	struct mac80211_data *datahdr = NULL;
 
+	datahdr = (struct mac80211_data*)frame;
+	if(mctrl->fromDS == 1 && mctrl->toDS == 0) {
+		//printw("From distribution system");
+	} else
+	if(mctrl->fromDS == 0 && mctrl->toDS == 1) {
+		printw("To distribution system");
+	}
 }
