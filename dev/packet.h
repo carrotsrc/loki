@@ -29,6 +29,13 @@ struct mac80211_management_hdr {
 	uint32_t htctrl; ///< HT Control - present if control.order = 1
 } __attribute__((__packed__));
 
+struct mac80211_data {
+	uint16_t control;
+	uint16_t duration_id;
+	uint8_t ra[6];
+	
+}
+
 struct mac80211_beacon_fixed {
 	uint8_t timestamp[8]; ///< Timestamp
 	uint16_t beacon_interval; ///< period between beacon broadcasts
@@ -66,6 +73,26 @@ enum mac80211_subtype_management {
 	ACTION,
 	ACTION_NO_ACK,
 	RESERVED_B
+};
+
+enum mac80211_subtype_data {
+	DATA,
+	DATA_CF_ACK,
+	DATA_CF_POLL,
+	DATA_CF_ACK_CF_POLL,
+	DATA_NULL,
+	CF_AK,
+	CF_POLL,
+	CF_ACK_CF_POLL,
+	QOS_DATA,
+	QOS_DATA_CF_ACK,
+	QOS_DATA_CF_POLL,
+	QOS_DATA_CF_ACK_CF_POLL,
+	QOS_DATA_NULL,
+	RESERVED,
+	QOS_CF_POLL,
+	QOS_CF_ACK_CF_POLL,
+	RESERVED
 };
 
 struct mac80211_control {

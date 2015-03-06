@@ -80,7 +80,7 @@ void create_controllers(struct loki_state *state) {
 
 	state->controllers.ap = controller;
 
-	// Build the AP mode controller
+	// Build the STA mode controller
 	controller = create_mode_controller();
 
 	controller->left = create_controller();
