@@ -119,7 +119,14 @@ static unsigned int process_beacon(const uint8_t *frame, const struct mac80211_c
 		item->ssid = ssid;
 		memcpy(&(item->mac), (uint8_t*)((struct mac80211_management_hdr*)frame)->bssid, 6);
 		item->count = 0;
+		// linked list
 		item->next = NULL;
+
+		// mac addresses
+		item->list = NULL;
+		item->tail = NULL;
+		item->sta_count = 0;
+
 		log->beacon.num++;
 		modified = 1;
 	} else {
@@ -255,14 +262,31 @@ static uint8_t filter_frame_data(const uint8_t *packet, uint16_t len, const stru
 
 static unsigned int process_data(const uint8_t *frame, const struct mac80211_control *mctrl, uint16_t len, struct frame_log *log) {
 	struct mac80211_data *datahdr = NULL;
+	struct beacon_frame_item *item;
+	struct macaddr_list_item *maddr = NULL;
 
 	datahdr = (struct mac80211_data*)frame;
 	if(mctrl->fromDS == 1 && mctrl->toDS == 0) {
 		//printw("From distribution system");
 	} else
 	if(mctrl->fromDS == 0 && mctrl->toDS == 1) {
-		if(beacon_mac_exists(log->beacon.list, datahdr->ra) != NULL)
-			printw("Match found");
+		if((item = beacon_mac_exists(log->beacon.list, datahdr->ra)) != NULL) {
+			if(proberq_mac_exists(item->list, datahdr->sa) == NULL) {
+
+				maddr = (struct macaddr_list_item*) malloc(sizeof(struct macaddr_list_item));
+				if(item->sta_count == 0) 
+					item->list = maddr;
+				maddr->prev = item->tail;
+				maddr->next = NULL;
+
+				if(item->tail != NULL)
+					item->tail->next = maddr;
+
+				item->tail = maddr;
+				memcpy(maddr->addr, datahdr->sa, 6);
+				item->sta_count++;
+			}
+		}
 	}
 }
 

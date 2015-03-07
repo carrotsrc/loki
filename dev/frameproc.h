@@ -13,6 +13,7 @@ struct beacon_frame_item {
 	uint8_t mac[6], ssid_len;
 	char *ssid;
 	uint64_t count;
+	uint32_t sta_count;
 	struct macaddr_list_item *list, *tail;
 };
 

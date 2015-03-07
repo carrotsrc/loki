@@ -17,7 +17,6 @@ void create_screens(struct loki_state *state) {
 	screen->centre = vcentre;
 	screen->right = vright;
 
-
 	// Access Point focus
 	state->current = state->screens.overview = screen;
 

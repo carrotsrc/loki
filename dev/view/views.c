@@ -92,8 +92,25 @@ void print_ap_centre(struct loki_state *state, WINDOW *handle) {
 }
 
 void print_ap_right(struct loki_state *state, WINDOW *handle) {
+	struct beacon_frame_item *item = state->log->beacon.list;
+	struct macaddr_list_item *addr;
+	int i = 0;
+	do {
+		if(i++ == state->log->beacon.selected)
+			break;
+	} while( (item = item->next) != NULL);
+
 	wmove(handle, 0 , 0);
-	wprintw(handle, "AP RIGHT");
+	wprintw(handle, "Stations\n");
+	wprintw(handle, "--------\n");
+
+	addr = item->list;
+	if((addr = item->list) == NULL)
+		return;
+
+	do {
+		wprintw(handle, "%s\n", print_mac_address(addr->addr));
+	} while( (addr = addr->next) != NULL);
 }
 
 void print_sta_centre(struct loki_state *state, WINDOW *handle) {
