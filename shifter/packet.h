@@ -10,6 +10,6 @@ struct header_radiotap {
 	uint32_t present;
 };
 
-struct header_radiotap contruct_header_radiotap();
+struct header_radiotap *contruct_header_radiotap(uint16_t);
 
 #endif
