@@ -112,3 +112,62 @@ char *print_mac_address(uint8_t *address) {
 	floc = '\0';
 	return faddr;
 }
+
+uint16_t encode_mac80211_control(const struct mac80211_control *stc) {
+	uint16_t ctrl;
+	ctrl |= stc->order;
+	ctrl <<= 1;
+
+	ctrl |= stc->protected;
+	ctrl <<= 1;
+
+	ctrl |= stc->data;
+	ctrl <<= 1;
+
+	ctrl |= stc->powerman;
+	ctrl <<= 1;
+
+	ctrl |= stc->retry;
+	ctrl <<= 1;
+
+	ctrl |= stc->frags;
+	ctrl <<= 1;
+
+	ctrl |= stc->fromDS;
+	ctrl <<= 1;
+
+	ctrl |= stc->toDS;
+	ctrl <<= 4;
+
+	ctrl |= stc->subtype;
+	ctrl <<= 2;
+
+	ctrl |= stc->type;
+	ctrl <<= 2;
+
+	ctrl |= stc->protocol;
+	return ctrl;
+}
+
+struct header_radiotap *construct_header_radiotap() {
+	struct header_radiotap *header;
+	
+	header = (struct header_radiotap*) malloc(sizeof(struct header_radiotap));
+
+	header->version = 0;
+	header->pad = 0;
+	header->len = sizeof(struct header_radiotap);
+	header->present = 0;
+	return header;
+}
+
+struct mac80211_management_hdr *construct_header_management(const uint8_t *ta, const uint8_t *ra, const uint8_t *bssid, const struct mac80211_control *stc) {
+	struct mac80211_management_hdr *mng = (struct mac80211_management_hdr*)malloc(sizeof(struct mac80211_management_hdr));
+	mng->control = encode_mac80211_control(stc);
+	mng->duration_id = 500;
+	memcpy(mng->ra, ra, 6);
+	memcpy(mng->ta, ta, 6);
+	memcpy(mng->bssid, bssid, 6);
+	mng->seqctrl = 0;
+	return mng;
+}
