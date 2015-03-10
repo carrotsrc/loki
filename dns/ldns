@@ -65,7 +65,7 @@ while 1:
 
     response = DNSResponse(query[0])
     response.addQuery(queryRecord)
-    response.addAnswer("172.16.0.1", RecordType.A)
+    response.addAnswer("192.168.1.1", RecordType.A)
     packet = response.generatePacket()
     s.sendto(packet, addr)
     if verbose:
