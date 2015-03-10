@@ -14,6 +14,7 @@ struct beacon_frame_item {
 	char *ssid;
 	uint64_t count;
 	uint32_t sta_count;
+	uint16_t sta_selected;
 	struct macaddr_list_item *list, *tail;
 };
 

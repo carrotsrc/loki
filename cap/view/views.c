@@ -105,11 +105,15 @@ void print_ap_right(struct loki_state *state, WINDOW *handle) {
 	wprintw(handle, "--------\n");
 
 	addr = item->list;
+	i = 0;
 	if((addr = item->list) == NULL)
 		return;
 
 	do {
-		wprintw(handle, "%s\n", print_mac_address(addr->addr));
+		if(i++ == item->sta_selected)
+			wprintw(handle, "> %s\n", print_mac_address(addr->addr));
+		else
+			wprintw(handle, "  %s\n", print_mac_address(addr->addr));
 	} while( (addr = addr->next) != NULL);
 }
 

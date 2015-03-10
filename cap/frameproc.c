@@ -274,8 +274,10 @@ static unsigned int process_data(const uint8_t *frame, const struct mac80211_con
 			if(proberq_mac_exists(item->list, datahdr->sa) == NULL) {
 
 				maddr = (struct macaddr_list_item*) malloc(sizeof(struct macaddr_list_item));
-				if(item->sta_count == 0) 
+				if(item->sta_count == 0) {
 					item->list = maddr;
+					item->sta_selected = 0;
+				}
 				maddr->prev = item->tail;
 				maddr->next = NULL;
 

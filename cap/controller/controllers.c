@@ -1,6 +1,15 @@
 #include <stdlib.h>
 #include "controllers.h"
 
+void action_distrupt_station() {
+	move(LINES-1, 1);
+	printw("Disrupt station ");
+}
+
+void action_distrupt_network() {
+	move(LINES-1, 1);
+	printw("Distrupt network");
+}
 struct mode_controller *create_mode_controller() {
 	struct mode_controller *controller;
 
@@ -95,7 +104,40 @@ void controller_overview_mode(int code, struct loki_state *state) {
 }
 
 void controller_ap_mode(int code, struct loki_state *state) {
+	struct beacon_frame_item *item = state->log->beacon.list;
+	struct macaddr_list_item *addr;
+	int i = 0;
 	switch(code) {
+	case 'd':
+		action_distrupt_station();
+		break;
+
+	case 'D':
+		action_distrupt_network();
+		break;
+
+	case 'j':
+		do {
+			if(i++ == state->log->beacon.selected)
+				break;
+		} while( (item = item->next) != NULL);
+
+		if(item->sta_selected + 1 == item->sta_count)
+			item->sta_selected = 0;
+		else
+			item->sta_selected++;
+		break;
+	case 'k':
+		do {
+			if(i++ == state->log->beacon.selected)
+				break;
+		} while( (item = item->next) != NULL);
+
+		if(item->sta_selected == 0)
+			item->sta_selected = item->sta_count-1;
+		else
+			item->sta_selected--;
+		break;
 	case 0x1b:
 		pthread_mutex_lock(&scrmutex);
 		state->current_controller = state->controllers.overview;
