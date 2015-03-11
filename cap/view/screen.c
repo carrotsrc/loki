@@ -26,6 +26,10 @@ void write_screen(struct screen *screen, struct loki_state *state) {
 
 	move(0,15);
 	printw("Total Packets: %ld | ", ((struct frame_log*)(state->log))->totalPackets);
+	move(LINES-1, 1);
+	clrtoeol();
+	if(state->status_msg != NULL)
+		printw(state->status_msg);
 
 	screen_refresh(screen);
 	pthread_mutex_unlock(&scrmutex);

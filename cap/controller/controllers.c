@@ -1,15 +1,9 @@
 #include <stdlib.h>
 #include "controllers.h"
 
-void action_distrupt_station() {
-	move(LINES-1, 1);
-	printw("Disrupt station ");
-}
+void action_distrupt_station(struct loki_state*);
+void action_distrupt_network(struct loki_state*);
 
-void action_distrupt_network() {
-	move(LINES-1, 1);
-	printw("Distrupt network");
-}
 struct mode_controller *create_mode_controller() {
 	struct mode_controller *controller;
 
@@ -109,11 +103,11 @@ void controller_ap_mode(int code, struct loki_state *state) {
 	int i = 0;
 	switch(code) {
 	case 'd':
-		action_distrupt_station();
+		action_distrupt_station(state);
 		break;
 
 	case 'D':
-		action_distrupt_network();
+		action_distrupt_network(state);
 		break;
 
 	case 'j':
@@ -142,6 +136,7 @@ void controller_ap_mode(int code, struct loki_state *state) {
 		pthread_mutex_lock(&scrmutex);
 		state->current_controller = state->controllers.overview;
 		state->current = state->screens.overview;
+		state->status_msg = NULL;
 		pthread_mutex_unlock(&scrmutex);
 		break;
 	}
@@ -153,7 +148,60 @@ void controller_sta_mode(int code, struct loki_state *state) {
 		pthread_mutex_lock(&scrmutex);
 		state->current_controller = state->controllers.overview;
 		state->current = state->screens.overview;
+		state->status_msg = NULL;
 		pthread_mutex_unlock(&scrmutex);
 		break;
 	}
+}
+
+void action_distrupt_station(struct loki_state *state) {
+	struct beacon_frame_item *item = state->log->beacon.list;
+	struct macaddr_list_item *addr;
+	uint8_t *macSta, *macAp;
+	uint16_t i;
+
+	i = 0;
+	do {
+		if(i++ == state->log->beacon.selected)
+			break;
+
+	} while( (item = item->next) != NULL);
+
+	addr = item->list;
+	macAp = item->mac;
+
+	i = 0;
+	if((addr = item->list) == NULL)
+		return;
+
+	do {
+		if(i++ == item->sta_selected)
+			break;
+
+	} while( (addr = addr->next) != NULL);
+
+	macSta = addr->addr;
+	char *status = (char*)malloc(sizeof(char)*48);
+	sprintf(status, "Disrupt station %s -> %s ", print_mac_address(macAp), print_mac_address(macSta));
+	set_status_message(status, state);
+}
+
+void action_distrupt_network(struct loki_state *state) {
+	struct beacon_frame_item *item = state->log->beacon.list;
+	uint8_t macSta[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff },
+		*macAp;
+	uint16_t i;
+
+	i = 0;
+	do {
+		if(i++ == state->log->beacon.selected)
+			break;
+
+	} while( (item = item->next) != NULL);
+
+	macAp = item->mac;
+
+	char *status = (char*)malloc(sizeof(char)*48);
+	sprintf(status, "Disrupt network %s -> %s ", print_mac_address(macAp), print_mac_address(macSta));
+	set_status_message(status, state);
 }

@@ -46,7 +46,7 @@ int main( int argc, char *argv[]) {
 	int r;
 
 	cbreak();
-
+	lstate.status_msg = NULL;
 	scrmutex = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
 
 	addr = "192.168.0.1";

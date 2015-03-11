@@ -27,8 +27,11 @@ struct loki_state {
 
 	struct screen *current;
 	struct mode_controller *current_controller;
+	char *status_msg;
 
 };
+
+void set_status_message(char*, struct loki_state*);
 
 static pthread_mutex_t scrmutex;
 #endif

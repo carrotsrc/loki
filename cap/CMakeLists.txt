@@ -12,6 +12,7 @@ set( SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/monitor.c
 	${CMAKE_CURRENT_SOURCE_DIR}/frameproc.c
 	${CMAKE_CURRENT_SOURCE_DIR}/capture.c
+	${CMAKE_CURRENT_SOURCE_DIR}/state.c
 	${CMAKE_CURRENT_SOURCE_DIR}/view/screen.c
 	${CMAKE_CURRENT_SOURCE_DIR}/view/views.c
 	${CMAKE_CURRENT_SOURCE_DIR}/controller/controllers.c
