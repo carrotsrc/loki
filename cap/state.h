@@ -1,6 +1,7 @@
 #ifndef STATE_H
 #define STATE_H
 #include <pthread.h>
+#include <pcap.h>
 #include "view/screen.h"
 #include "capture.h"
 
@@ -28,6 +29,7 @@ struct loki_state {
 	struct screen *current;
 	struct mode_controller *current_controller;
 	char *status_msg;
+	pcap_t *handle;
 
 };
 

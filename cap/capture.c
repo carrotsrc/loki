@@ -50,6 +50,7 @@ int device_capture(struct loki_state *state) {
 		return 1;
 	}
 
+	state->handle = handle;
 	if(pcap_loop(handle, 0, capture_cb, (u_char*)state) == -1) {
 		fprintf(stderr, "Error on capture loop\n");
 		pcap_close(handle);

@@ -171,3 +171,19 @@ struct mac80211_management_hdr *construct_header_management(const uint8_t *ta, c
 	mng->seqctrl = 0;
 	return mng;
 }
+
+uint8_t *construct_packet(struct header_radiotap *tap, struct mac80211_management_hdr *header, uint16_t reason, size_t *len) {
+	uint8_t *packet = (uint8_t*) malloc( tap->len + sizeof(struct mac80211_management_hdr) + 2);
+	size_t pos = 0;
+
+	memcpy(packet+pos, tap, tap->len);
+	pos += tap->len;
+
+	memcpy(packet+pos, header, sizeof(struct mac80211_management_hdr));
+	pos += sizeof(struct mac80211_management_hdr);
+
+	memcpy(packet+pos, &reason, 2);
+	pos += 2;
+	*len = pos;
+	return packet;
+}

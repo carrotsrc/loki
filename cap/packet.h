@@ -129,4 +129,6 @@ struct mac80211_management_hdr *construct_header_management(const uint8_t*, cons
 
 struct mac80211_control *decode_mac80211_control(uint16_t);
 uint16_t encode_mac80211_control(const struct mac80211_control*);
+
+uint8_t *construct_packet(struct header_radiotap*, struct mac80211_management_hdr*, uint16_t, size_t*);
 #endif
