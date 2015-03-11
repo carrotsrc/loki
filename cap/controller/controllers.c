@@ -3,6 +3,7 @@
 
 void action_distrupt_station(struct loki_state*);
 void action_distrupt_network(struct loki_state*);
+void action_send_disruption(uint8_t*, uint8_t*, uint8_t*);
 
 struct mode_controller *create_mode_controller() {
 	struct mode_controller *controller;
@@ -204,4 +205,29 @@ void action_distrupt_network(struct loki_state *state) {
 	char *status = (char*)malloc(sizeof(char)*48);
 	sprintf(status, "Disrupt network %s -> %s ", print_mac_address(macAp), print_mac_address(macSta));
 	set_status_message(status, state);
+}
+
+void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid) {
+	struct header_radiotap *tap;
+	struct mac80211_management_hdr *headerToSta, *headerToAp;
+	struct mac80211_control ctrl;
+
+	ctrl = (struct mac80211_control) {
+		.protocol = 0x0,
+		.type = 0x0,
+		.subtype = 0xc,
+		.toDS = 0,
+		.fromDS = 0,
+		.frags = 0,
+		.retry = 0,
+		.powerman = 0,
+		.data = 0,
+		.protected = 0,
+		.order = 0,
+	};
+
+	tap = construct_header_radiotap();
+
+	headerToSta = construct_header_management(macAp, macSta, bssid, &ctrl);
+	headerToAp = construct_header_management(macSta, macAp, bssid, &ctrl);
 }
