@@ -2,13 +2,22 @@
 
 Wireless device security demo
 
-#### Background
+I was asked to present (to 15 year olds) basic security problems with wireless devices and how to be vigilant over their hardware. For the talk I put together a small (controlled) demonstration including this software.
 
-I have been asked to demonstrate some wireless device security problems as part of a someone else's larger lecture to GCSE students.
+### Loki Capture
 
-I have a functional demonstration worked out but I aim to run as much as possible from custom software, so I understand at least whats happening at the level of the software I would otherwise use in the demonstration. It's taking me on quite a rollercoaster through TAP devices, netlink messaging, 80211 standard, DHCP, packet analysis and much more. It's probably more educational for me than it will be for the teens.
+Loki Capture is a basic single-channel ncurses wireless network analysis tool:
 
-Current Progress: Capture
+- Overview displays access points and probe requests
+- AP focus reveals basic service set + injection
+- Probe request focus shows number of devices issuing requests for AP
+
+Of course, since it is a demo for youngsters, I also added in a raw packet dump on the left
+
+Other points of interest:
+
+- Switching wireless card monitor mode on via netlink
+- Raw packet construction
 
 ### Loki DNS Spoof
 
@@ -18,20 +27,9 @@ Working backwards from wireshark's packet and hex dumps (I was cross eyed after 
 
 I am positive there is a more elegent solution to applying predefine data structure on a sequence of bytes than that hacked together mess I layed out using list indecies.
 
+### Dependecies
 
-### Loki Capture
-
-**2014/12/06**
-
-This is my current work. I started out using pcap to get packets from the device. I wanted to break it down into the specific functions to bring the device up into monitor mode correctly without using iw; however it was spitting out an error (-6 if memory serves) even though the device *can* be put into the mode.
-
-Since *iw* can set the monitor flag correctly, I looked at how that was doing it.
-
-After working through it's preprocessor (black magick) code for setting up the command handlers, I got into the libnl stuff; using iw and the nl80211.h as a reference, the device is now switched into monitor mode correctly via a netlink message.
-
-Now I've moved onto getting packet capture up and running again via pcap.
-
-
-## NOTE: ##
-
-This is placed here for *educational* purposes.
+- Python
+- libnl
+- libpcap
+- libcurses
