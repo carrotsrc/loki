@@ -104,7 +104,7 @@ void controller_overview_mode(int code, struct loki_state *state) {
 }
 
 void controller_ap_mode(int code, struct loki_state *state) {
-	struct beacon_frame_item *item = state->log->beacon.list;
+	struct beacon_ssid_item *item = state->log->beacon.list;
 	struct macaddr_list_item *addr;
 	int i = 0;
 	switch(code) {
@@ -125,28 +125,106 @@ void controller_ap_mode(int code, struct loki_state *state) {
 		flood_ap = 1;
 		action_flood_ap(state);
 		break;
+		
+	case 'h':
+	case 'l':
+		if(state->controllers.ap->selected == state->controllers.ap->centre) {
+			state->controllers.ap->selected = state->controllers.ap->right;
+		} else {
+			state->controllers.ap->selected = state->controllers.ap->centre;
+		}
+		break;
 
 	case 'j':
-		do {
-			if(i++ == state->log->beacon.selected)
-				break;
-		} while( (item = item->next) != NULL);
 
-		if(item->sta_selected + 1 == item->sta_count)
-			item->sta_selected = 0;
-		else
-			item->sta_selected++;
+		if(state->controllers.ap->selected == state->controllers.ap->centre) {
+			do {
+				if(i++ == state->log->beacon.selected)
+					break;
+			} while( (item = item->next) != NULL);
+			
+			if(item->selected + 1 == item->bss_count)
+				item->selected = 0;
+			else
+				item->selected++;
+
+			
+		} else {
+			
+			i = 0;
+			struct beacon_frame_item *apitem = state->log->beacon.list;
+			do {
+				if(i++ == state->log->beacon.selected) {
+
+					i = 0;
+					apitem = item->list;
+
+					if(apitem == NULL) return;
+					
+					do {
+						if(i++ == item->selected) {
+							break;
+						}
+
+					} while( (item = item->next));
+					break;
+
+				}
+
+			} while( (item = item->next) != NULL);
+			
+			if(apitem->sta_selected + 1 == apitem->sta_count)
+				apitem->sta_selected = 0;
+			else
+				apitem->sta_selected++;
+		}
+
+		
 		break;
-	case 'k':
-		do {
-			if(i++ == state->log->beacon.selected)
-				break;
-		} while( (item = item->next) != NULL);
 
-		if(item->sta_selected == 0)
-			item->sta_selected = item->sta_count-1;
-		else
-			item->sta_selected--;
+	case 'k':
+		
+		if(state->controllers.ap->selected == state->controllers.ap->centre) {
+			do {
+				if(i++ == state->log->beacon.selected)
+					break;
+			} while( (item = item->next) != NULL);
+			
+			if(item->selected == 0)
+				item->selected = item->bss_count-1;
+			else
+				item->selected--; 
+	
+		} else {
+
+			i = 0;
+			struct beacon_frame_item *apitem = state->log->beacon.list;
+			do {
+				if(i++ == state->log->beacon.selected) {
+
+					i = 0;
+					apitem = item->list;
+
+					if(apitem == NULL) return;
+					
+					do {
+						if(i++ == item->selected) {
+							break;
+						}
+
+					} while( (item = item->next));
+					break;
+
+				}
+
+			} while( (item = item->next) != NULL);
+			
+			if(apitem->sta_selected == 0)
+				apitem->sta_selected = apitem->sta_count-1;
+			else
+				apitem->sta_selected--;
+		}
+
 		break;
 	case 0x1b:
 		pthread_mutex_lock(&scrmutex);
@@ -172,17 +250,26 @@ void controller_sta_mode(int code, struct loki_state *state) {
 }
 
 void action_distrupt_station(struct loki_state *state) {
-	struct beacon_frame_item *item = state->log->beacon.list;
+	struct beacon_ssid_item *ssitem = state->log->beacon.list;
+	struct beacon_frame_item *item = NULL;
 	struct macaddr_list_item *addr;
 	uint8_t *macSta, *macAp;
 	uint16_t i;
 
 	i = 0;
 	do {
-		if(i++ == state->log->beacon.selected)
-			break;
+		if(i++ == state->log->beacon.selected) {
+			i = 0;
+			item = ssitem->list;
+			do {
+				if(i++ == ssitem->selected)
+					break;
 
-	} while( (item = item->next) != NULL);
+			} while( (item = item->next));
+			break;
+		}
+
+	} while( (ssitem = ssitem->next) != NULL);
 
 	addr = item->list;
 	macAp = item->mac;
@@ -205,17 +292,27 @@ void action_distrupt_station(struct loki_state *state) {
 }
 
 void action_distrupt_network(struct loki_state *state) {
-	struct beacon_frame_item *item = state->log->beacon.list;
+	struct beacon_ssid_item *ssitem = state->log->beacon.list;
+	struct beacon_frame_item *item = NULL;
 	uint8_t macSta[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff },
 		*macAp;
 	uint16_t i;
 
 	i = 0;
 	do {
-		if(i++ == state->log->beacon.selected)
-			break;
+		
+		if(i++ == state->log->beacon.selected) {
+			i = 0;
+			item = ssitem->list;
+			do {
+				if(i++ == ssitem->selected)
+					break;
 
-	} while( (item = item->next) != NULL);
+			} while( (item = item->next));
+			break;
+		}
+
+	} while( (ssitem = ssitem->next) != NULL);
 
 	macAp = item->mac;
 

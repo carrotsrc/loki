@@ -17,7 +17,7 @@ static char *elements_get_ssid(uint8_t*, uint16_t);
 
 
 static unsigned int process_beacon(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
-static void process_beacon_ap(const struct mac80211_management_hdr*, struct beacon_ssid_item*);
+static int process_beacon_ap(const struct mac80211_management_hdr*, struct beacon_ssid_item*);
 static unsigned int process_probe_request(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
 
 static unsigned int process_data(const uint8_t*, const struct mac80211_control*, uint16_t, struct frame_log*);
@@ -121,6 +121,8 @@ static unsigned int process_beacon(const uint8_t *frame, const struct mac80211_c
 		log->beacon.tail = item;
 		item->ssid_len = strlen(ssid);
 		item->ssid = ssid;
+		item->bss_count = 0;
+		item->selected = 0;
 	
 		// linked list
 		item->next = NULL;
@@ -133,6 +135,7 @@ static unsigned int process_beacon(const uint8_t *frame, const struct mac80211_c
 		log->beacon.num++;
 		modified = 1;
 	} else {
+		modified = process_beacon_ap((struct mac80211_management_hdr*)frame, item);
 		free(ssid);
 	}
 
@@ -140,19 +143,19 @@ static unsigned int process_beacon(const uint8_t *frame, const struct mac80211_c
 	return modified;
 }
 
-void process_beacon_ap(const struct mac80211_management_hdr *hdr, struct beacon_ssid_item *bss) {
+int process_beacon_ap(const struct mac80211_management_hdr *hdr, struct beacon_ssid_item *ess) {
 	struct beacon_frame_item* item = NULL;
-	if( (item = beacon_ap_exists(hdr->bssid, bss->list)) == NULL ) {
+	if( (item = beacon_ap_exists(hdr->bssid, ess->list)) == NULL ) {
 		item = (struct beacon_frame_item*)malloc(sizeof(struct beacon_frame_item));
 		
-		if(bss->list == NULL)
-			bss->list = item;
-		bss->tail = item;
+		if(ess->list == NULL)
+			ess->list = item;
 
-		item->prev = bss->tail;
+		item->prev = ess->tail;
 		if(item->prev != NULL)
 			item->prev->next = item;
-	
+
+		ess->tail = item;
 		memcpy(&(item->mac), (uint8_t*)(hdr->bssid), 6);
 		item->count = 1;
 		item->sta_count = 0;
@@ -163,12 +166,14 @@ void process_beacon_ap(const struct mac80211_management_hdr *hdr, struct beacon_
 		
 		item->list = NULL;
 		item->tail = NULL;
-		
-		
+		ess->bss_count++;
+		return 1;
 		
 	} else {
 		item->count++;
 	}
+	
+	return 0;
 }
 
 static struct beacon_frame_item *beacon_ap_exists(const char* value, const struct beacon_frame_item* item) {

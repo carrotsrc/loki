@@ -14,6 +14,10 @@ struct beacon_frame_item {
 	uint64_t count;
 	uint32_t sta_count;
 	uint16_t sta_selected;
+	
+	uint8_t ssid_len;
+	char *ssid;
+
 	struct macaddr_list_item *list, *tail;
 };
 
@@ -21,7 +25,8 @@ struct beacon_ssid_item {
 	struct beacon_ssid_item *prev, *next;
 	uint8_t ssid_len;
 	char *ssid;
-	uint16_t num;
+	uint16_t num, bss_count;
+	
 	int16_t selected;
 	
 	

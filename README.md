@@ -2,7 +2,7 @@
 
 Wireless device security demo
 
-I was asked to present (to 15 year olds) basic security problems with wireless devices and how to be vigilant over their hardware. For the talk I put together a small (controlled) demonstration including this software.
+I was asked to present basic security problems with wireless devices and how to be vigilant over their hardware. For the talk I put together a small (controlled) demonstration including this software.
 
 ### Loki Capture
 

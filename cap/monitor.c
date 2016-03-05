@@ -7,7 +7,7 @@
 #include "nl80211.h"
 
 /* free netlink stuff */
-inline void free_nlmem(struct nl_msg *msg, struct nl_sock *nls) {
+inline static void free_nlmem(struct nl_msg *msg, struct nl_sock *nls) {
 	if(msg != NULL)
 		nlmsg_free(msg);
 
